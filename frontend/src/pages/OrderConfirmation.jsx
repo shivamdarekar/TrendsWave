@@ -70,7 +70,7 @@ const OrderConfirmation = () => {
                                     </p>
                                 </div>
                                 <div className="ml-auto text-right">
-                                    <p>$ {item.price.toLocaleString()}</p>
+                                    <p>₹ {item.price.toLocaleString()}</p>
                                     <p className="text-sm text-gray-600">Quantity: {item.quantity }</p>
                                 </div>
                             </div>

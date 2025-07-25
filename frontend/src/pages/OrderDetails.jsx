@@ -109,10 +109,10 @@ const OrderDetails = () => {
                                                 </Link>
                                             </div>
                                         </td>
-                                        <td className="py-3 px-4 text-center">${item.price}</td>
+                                        <td className="py-3 px-4 text-center">₹{item.price}</td>
                                         <td className="py-3 px-4 text-center">{item.quantity}</td>
                                         <td className="py-3 px-4 text-center">
-                                            ${item.price * item.quantity}
+                                            ₹{item.price * item.quantity}
                                         </td>
                                     </tr>
                                 ))}

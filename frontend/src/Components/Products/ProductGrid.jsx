@@ -23,7 +23,7 @@ const ProductGrid = ({ products, loading, error }) => {
               {/* Overlay for Name & Price */}
               <div className="absolute bottom-0 left-0 w-full bg-black bg-opacity-50 text-white p-3 rounded-b-lg">
                 <h3 className="text-sm font-semibold">{product.name}</h3>
-                <p className="text-xs font-medium">$ {product.price}</p>
+                <p className="text-xs font-medium">₹ {product.price}</p>
               </div>
             </div>
           </div>
