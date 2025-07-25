@@ -1,0 +1,52 @@
+-make frontend and backend two folders
+-in frontend go in telwind vite 
+-run this command npm create vite@latest my-project -- --template react
+-install npm then run dev
+-then npm install -D tailwindcss@3 postcss autoprefixer run this
+-delete app.css dont have use
+-go in inter google fonts get fonts and cpy its link code
+-in index.html paste code below link tag
+-install react router npm i react-router-dom react-icons
+
+-used sonner for notification
+
+
+-react runs html in js file
+-react is library doesnot have restriction
+-UI updation ko react control karta hai
+-js se console mai value change ho rahi hai but ui still same thats why react came in picture
+-vite is react framework which have some rule like naming convention
+-react arrange files component based
+-every update ko immidiatly update karna imp nahi hai fiber bulk mai update bhejta hai aur update karta hai
+-different types of update have different priorities  //github react fiber architecture documentation
+-Compares the new Virtual DOM with the old one (Diffing Algorithm).
+-Finds what changed and updates only that part in the real DOM (Reconciliation).
+
+-The useEffect hook is used in React to perform side effects in function components. These side effects can include:
+  *Fetching data from an API
+  *Updating the DOM
+  *Subscribing to events
+  *Setting up timers
+
+-useState → To manage component state.
+-useRef → To keep a reference to an element without causing re-renders.
+-useEffect → A React Hook that runs code after the component renders.
+
+
+paypal:
+-paypal developer acc 
+-use react-paypal-js
+
+whitespace-nowrap => test stay on same line 
+
+dom ->Jab bhi koi HTML page browser me load hota hai, browser us HTML ko ek JavaScript object tree me convert karta hai — isi tree ko kehte hain DOM.
+jiske through hum JavaScript se page ke elements ko read, change, ya interact kar sakte hain.
+
+Virtual DOM
+⚙️ React kya karta hai:
+Pehle Virtual DOM banata hai (ye real DOM ka copy hota hai, lekin memory me)
+Jab koi state ya data change hota hai, React compare karta hai old Virtual DOM vs new Virtual DOM
+Sirf difference wale parts real DOM me update karta hai (efficiently!)
+
+
+recent orders sequesnce
