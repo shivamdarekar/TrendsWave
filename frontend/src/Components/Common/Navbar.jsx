@@ -35,7 +35,7 @@ const Navbar = () => {
 
                 {/* left-logo */}
                 <div>
-                    <Link to="/" className="text-2xl font-medium">
+                    <Link to="/" className=" text-xl sm:text-2xl font-medium mr-4 ">
                         TrendsWave
                     </Link>
                 </div>
@@ -71,11 +71,11 @@ const Navbar = () => {
 
                 {/* Right-icons */}
 
-                <div className='flex items-center space-x-4'>
+                <div className='flex items-center  gap-3 sm:gap-4'>
                     {user && user.role === "admin" && (
-                        <Link to="/admin" className="block bg-black px-2 rounded text-sm text-white">
-                        Admin
-                    </Link>
+                        <Link to="/admin" className="block bg-black px-2 rounded text-sm text-white ">
+                            Admin
+                        </Link>
                     )}
 
                     <Link to="/profile" className='hover:text-black'>
@@ -107,38 +107,53 @@ const Navbar = () => {
 
             {/* Mobile Navigation */}
             <div className={`fixed top-0 left-0 w-3/4 sm:w-1/2 md:w-1/3 h-full bg-white shadow-lg transform
-                transition-transform duration-300 z-50 ${navDrawerOpen ? "translate-x-0" : "-translate-x-full"
+                     transition-transform duration-300 z-50 ${navDrawerOpen ? "translate-x-0" : "-translate-x-full"
                 }`}
             >
-
-                <div className='flex justify-end p-4'>
+                <div className="flex justify-end p-4">
                     <button onClick={toggleNavDrawer}>
-                        <IoMdClose className='h-6 w-6 text-gray-700' />
+                        <IoMdClose className="h-6 w-6 text-gray-700" />
                     </button>
                 </div>
 
-                <div className='p-4'>
-                    <h2 className='text-xl font-semibold mb-4'>Menu</h2>
-                    <nav className='space-y-4'>
-                        <Link to="collections/all?gender=Men" onClick={toggleNavDrawer} className='block text-gray-700 hover:text-black'>
+                <div className="p-4">
+                    <h2 className="text-xl font-semibold mb-4">Menu</h2>
+                    <nav className="space-y-4">
+                        <Link
+                            to="collections/all?gender=Men"
+                            onClick={toggleNavDrawer}
+                            className="block text-gray-700 hover:text-black"
+                        >
                             Men
                         </Link>
 
-                        <Link to="collections/all?gender=Women" onClick={toggleNavDrawer} className='block text-gray-700 hover:text-black'>
+                        <Link
+                            to="collections/all?gender=Women"
+                            onClick={toggleNavDrawer}
+                            className="block text-gray-700 hover:text-black"
+                        >
                             Women
                         </Link>
 
-                        <Link to="collections/all?category=Top Wear" onClick={toggleNavDrawer} className='block text-gray-700 hover:text-black'>
+                        <Link
+                            to="collections/all?category=Top Wear"
+                            onClick={toggleNavDrawer}
+                            className="block text-gray-700 hover:text-black"
+                        >
                             Top Wear
                         </Link>
 
-                        <Link to="collections/all?category=Bottom Wear" onClick={toggleNavDrawer} className='block text-gray-700 hover:text-black'>
+                        <Link
+                            to="collections/all?category=Bottom Wear"
+                            onClick={toggleNavDrawer}
+                            className="block text-gray-700 hover:text-black"
+                        >
                             Bottom Wear
                         </Link>
                     </nav>
                 </div>
-
             </div>
+
         </>
     )
 }

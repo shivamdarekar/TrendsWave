@@ -119,6 +119,14 @@ const Login = () => {
                         {loading ? "Loading..." : "Sign In"}
                     </button>
 
+                    <button
+                        type="button"
+                        onClick={() => navigate("/seller/register")}
+                        className="w-full mt-4 text-purple-600 font-semibold text-sm hover:underline"
+                    >
+                        Want to sell on TrendsWave? Become a Seller
+                    </button>
+
                     <p className="mt-6 text-center text-sm">
                         Don't have an account? {""}
                         <Link

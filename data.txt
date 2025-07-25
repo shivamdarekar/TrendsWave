@@ -10,6 +10,12 @@
 
 -used sonner for notification
 
+  sm: '640px',   // Small tablets and up
+  md: '768px',   // Tablets and up
+  lg: '1024px',  // Laptops and up
+  xl: '1280px',
+  2xl: '1536px',
+
 
 -react runs html in js file
 -react is library doesnot have restriction

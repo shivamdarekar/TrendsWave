@@ -12,7 +12,7 @@ const GenderCollectionSection = () => {
                     <img
                         src={womensCollectionImage}
                         alt="Women's Collection"
-                        className="w-full h-[550px] object-cover rounded-xl transition-transform duration-300 group-hover:scale-105"
+                        className="w-full h-[450px] sm:h-[550px] object-cover rounded-xl transition-transform duration-300 group-hover:scale-105"
                     />
                     <div className="absolute bottom-4 left-4 bg-white bg-opacity-90 p-4 rounded-lg shadow-md">
                         <h2 className="text-2xl font-bold text-gray-900 mb-2">
@@ -29,7 +29,7 @@ const GenderCollectionSection = () => {
                     <img
                         src={mensCollectionImage}
                         alt="Men's Collection"
-                        className="w-full h-[550px] object-cover rounded-xl transition-transform duration-300 group-hover:scale-105"
+                        className="w-full h-[450px] sm:h-[550px] object-cover rounded-xl transition-transform duration-300 group-hover:scale-105"
                     />
                     <div className="absolute bottom-4 left-4 bg-white bg-opacity-90 p-4 rounded-lg shadow-md">
                         <h2 className="text-2xl font-bold text-gray-900 mb-2">

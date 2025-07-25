@@ -6,47 +6,46 @@ import {protect} from "../middleware/authMiddleware.js";
 const router = express.Router();
 
 router.post("/register", async (req, res) => {
-    const { name, email, password } = req.body;
+    const { name, email, password, role } = req.body;
 
     try {
         let user = await User.findOne({ email });
-        
         if (user) {
-            return res.status(400).json({ message: "User with this email already exists" });
+            return res.status(400).json({ message: "User already exists" });
         }
 
-        user = new User({ name, email, password});
+        // ⚠️ allow role only for trusted registration
+        const userRole = ["admin", "customer"].includes(role) ? role : "customer";
+
+        user = new User({ name, email, password, role: userRole });
         await user.save();
 
-        //create jwt payload
         const payload = { user: { id: user._id, role: user.role } };
 
-        //signin and return the token along with user data
         jwt.sign(
             payload,
             process.env.JWT_SECRET,
             { expiresIn: "40h" },
             (err, token) => {
                 if (err) throw err;
-                
-                //send the user and token in res
+
                 res.status(201).json({
                     user: {
                         _id: user._id,
                         name: user.name,
                         email: user.email,
-                        role:user.role,
+                        role: user.role,
                     },
                     token,
-                })
+                });
             }
-        )
-
+        );
     } catch (error) {
-        console.log(error);
-        return res.status(500).send("Internal server error")
+        console.error(error);
+        return res.status(500).send("Internal Server Error");
     }
 });
+
 
 
 router.post("/login", async (req, res) => {

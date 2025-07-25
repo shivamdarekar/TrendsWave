@@ -81,6 +81,7 @@ const OrderDetails = () => {
                         <table className="min-w-full text-gray-600 mb-4 text-center">
                             <thead className="bg-gray-100 text-sm text-gray-700 uppercase">
                                 <tr>
+                                    <th className="py-3 px-4 text-left">Image</th>
                                     <th className="py-3 px-4 text-left">Name</th>
                                     <th className="py-3 px-4 text-center">Unit Price</th>
                                     <th className="py-3 px-4 text-center">Quantity</th>
@@ -91,13 +92,15 @@ const OrderDetails = () => {
                             <tbody>
                                 {orderDetails.orderItems.map((item) => (
                                     <tr key={item.productId} className="border-b">
-                                        <td className="py-3 px-4 text-left">
+
+                                        <td className="py-2 px-2 sm:py-4 sm:px-4"><img
+                                            src={item.image}
+                                            alt={item.name}
+                                            className="w-12 h-12 object-cover rounded"
+                                        /></td>
+
+                                        <td className="py-3 px-4 text-left whitespace-nowrap">
                                             <div className="flex items-center gap-3">
-                                                <img
-                                                    src={item.image}
-                                                    alt={item.name}
-                                                    className="w-12 h-12 object-cover rounded"
-                                                />
                                                 <Link
                                                     to={`/product/${item.productId}`}
                                                     className="text-blue-500 hover:underline"

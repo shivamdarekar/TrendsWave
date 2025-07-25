@@ -3,13 +3,15 @@ import { Link } from 'react-router-dom';
 import register from "../assets/register.webp"
 import { registerUser } from '../redux/slices/authSlice.js';
 import { useDispatch, useSelector } from 'react-redux';
-import { useNavigate,useLocation } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { mergeCart } from '../redux/slices/cartSlice.js';
 
 const Register = () => {
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+
+    const [emailError, setEmailError] = useState("");
     const [passwordError, setPasswordError] = useState("");
     const dispatch = useDispatch();
     const navigate = useNavigate();
@@ -32,17 +34,30 @@ const Register = () => {
             }
         }
     }, [user, guestId, cart, navigate, isCheckoutRedirect, dispatch]);
-    
 
-    const handleSubmit = (e) => {   //e.preventDefault() prevents page reload
+
+    const handleSubmit = async (e) => {   //e.preventDefault() prevents page reload
         e.preventDefault();
         if (password.length < 6) {
             setPasswordError("Password must be at least 6 characters.");
             return;
-        } else {
-            setPasswordError("");
+        } 
+        
+        setPasswordError("");
+        setEmailError("");
+
+        try {
+            await dispatch(registerUser({ name, email, password })).unwrap();
+        } catch (error) {
+            console.error("Registration failed:", error);
+
+            // Handle known error cases
+            if (error.message?.toLowerCase().includes("user already exists")) {
+                setEmailError("This email is already registered. Please login or use another.");
+            } else {
+                setEmailError("Registration failed. Please try again.");
+            }
         }
-        dispatch(registerUser({ name, email, password }));
     }
 
     return (
@@ -89,6 +104,9 @@ const Register = () => {
                             placeholder="Enter your email address"
                             required
                         />
+                        {emailError && (
+                        <p className="text-red-500 text-sm mt-2">{emailError}</p>
+                    )}
                     </div>
 
                     <div className="mb-4">
@@ -114,6 +132,15 @@ const Register = () => {
                     >
                         {loading ? "Loading..." : "Sign Up"}
                     </button>
+
+                    <button
+                        type="button"
+                        onClick={() => navigate("/seller/register")}
+                        className="w-full mt-4 text-purple-600 font-semibold text-sm hover:underline"
+                    >
+                        Want to sell on TrendsWave? Become a Seller
+                    </button>
+
 
                     <p className="mt-6 text-center text-sm">
                         Already registered? {""}

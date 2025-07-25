@@ -21,6 +21,7 @@ import OrderManagement from "./Components/Admin/OrderManagement.jsx"
 import { Provider } from "react-redux";
 import store from "./redux/store.js"
 import ProtectedRoute from "./Components/Common/ProtectedRoute.jsx"
+import SellerRegister from "./pages/SellerRegister.jsx"
 
 
 function App() {
@@ -35,6 +36,7 @@ function App() {
             <Route index element={<Home />} />    {/*Loads Home inside <Outlet />*/}
             <Route path="login" element={<Login />} />
             <Route path="register" element={<Register />} />
+            <Route path="seller/register" element={<SellerRegister />} />
             <Route path="profile" element={<Profile />} />
             <Route path="collections/:collection" element={<CollectionPage />} />
             <Route path="product/:id" element={<ProductDetails />} />

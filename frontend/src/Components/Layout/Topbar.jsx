@@ -16,7 +16,7 @@ const Topbar = () => {
                     <RiTwitterXLine className="h-4 w-4" />
                 </a>
             </div>
-            <div className="text-sm text-center flex-grow">
+            <div className=" text-center flex-grow text-xs sm:text-sm">
                 <span>We Ship worldwide - Fast and reliable shipping!</span>
             </div>
             <div className="text-sm hidden md:block">
