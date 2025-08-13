@@ -59,17 +59,19 @@ router.post("/", async (req, res) => {
           name: product.name,
           image: product.images[0].url,
           price: product.price,
+          discountPrice: product.discountPrice,
           size,
           color,
           quantity,
+          owner:product.owner
         });
       }
 
       //recalculate total price
       cart.totalPrice = cart.products.reduce(
-        (acc, item) => acc + item.price * item.quantity,
+        (acc, item) => acc + ((item.discountPrice ?? item.price) * item.quantity),
         0
-      );
+      ).toFixed(2);
 
         //reduce() ek array method hai jo array ko ek single value me reduce karta hai. Jaise total sum, average, or merging.
         //accumalator mai hum total value store kr rahe hai
@@ -92,12 +94,14 @@ router.post("/", async (req, res) => {
             name: product.name,
             image: product.images[0].url,
             price: product.price,
+            discountPrice: product.discountPrice,
             size,
             color,
             quantity,
+            owner:product.owner
           },
         ],
-        totalPrice: product.price * quantity, //only 1 item ka total nikalega
+        totalPrice:((product.discountPrice ?? product.price) * quantity).toFixed(2), //only 1 item ka total nikalega
       });
       return res.status(201).json(newCart);
     }
@@ -133,8 +137,8 @@ router.put("/", async (req, res) => {
             }
 
             cart.totalPrice = cart.products.reduce(
-                (acc, item) => acc + item.price * item.quantity, 0
-            );
+                 (acc, item) => acc + ((item.discountPrice ?? item.price) * item.quantity), 0
+            ).toFixed(2)
 
             await cart.save();
             return res.status(200).json(cart);
@@ -169,8 +173,8 @@ router.delete("/", async (req, res) => {
             cart.products.splice(productIndex, 1);
 
             cart.totalPrice = cart.products.reduce(
-                (acc, item) => acc + item.price * item.quantity, 0
-            );
+                 (acc, item) => acc + ((item.discountPrice ?? item.price) * item.quantity), 0
+            ).toFixed(2)
 
             await cart.save();
             return res.status(200).json(cart);
@@ -190,13 +194,23 @@ router.get("/", async (req, res) => {
     const { userId, guestId } = req.query;
 
     try {
-        const cart = await getCart(userId, guestId);
+        let cart = await getCart(userId, guestId);
 
-        if (cart) {
-            return res.json(cart);
-        } else {
-            return res.status(404).json({ message: "Cart not found" });
+        if (!cart) {
+          // If no cart is found, create a new one
+          const newCartData = {
+            products: [],
+            totalPrice: 0
+          };
+          if (userId) {
+            newCartData.user = userId;
+          } else if (guestId) {
+            newCartData.guestId = guestId;
+          }
+          cart = await Cart.create(newCartData);
         }
+
+        return res.json(cart);
 
     } catch (error) {
         console.error(error);
@@ -245,7 +259,7 @@ router.post("/merge", protect, async (req, res) => {
         });
 
         userCart.totalPrice = userCart.products.reduce(
-          (acc, item) => acc + item.price * item.quantity, 0
+          (acc, item) => acc + ((item.discountPrice ?? item.price) * item.quantity), 0
         );
 
         await userCart.save();

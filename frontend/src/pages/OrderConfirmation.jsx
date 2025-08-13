@@ -3,33 +3,33 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { clearCart } from "../redux/slices/cartSlice";
 
-
 const OrderConfirmation = () => {
-
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const { checkout } = useSelector((state) => state.checkout);
-
-    //clear cart when order is confirmed
+    
     useEffect(() => {
+        // This effect runs once to process the order details passed from the checkout page.
         if (checkout && checkout._id) {
             dispatch(clearCart());
             localStorage.removeItem("cart");
         } else {
-            navigate("/my-orders")
+            // If a user navigates here directly or refreshes, the state will be lost.
+            // In that case, we cannot show a confirmation and should redirect them.
+            navigate("/my-orders",{replace:true});
         }
-    },[checkout,dispatch,navigate])
+    }, [checkout, dispatch, navigate]);
 
     const calculateEstimatedDelivery = (createdAt) => {
         const orderDate = new Date(createdAt);
-        orderDate.setDate(orderDate.getDate() + 6); //add 6 days to the order date
+        orderDate.setDate(orderDate.getDate() + 6); // add 6 days
         return orderDate.toLocaleDateString();
     };
 
     return (
         <div className="max-w-4xl mx-auto p-6 bg-white">
             <h1 className="text-4xl font-bold text-center text-emerald-700 mb-8">
-                Thank You for Your Order !
+                Thank You for Your Order!
             </h1>
 
             {checkout && (
@@ -48,7 +48,7 @@ const OrderConfirmation = () => {
                         {/* Estimated Delivery */}
                         <div>
                             <p className="text-emerald-700 text-sm">
-                                Estimated Delivery: {""}
+                                Estimated Delivery:{" "}
                                 {calculateEstimatedDelivery(checkout.createdAt)}
                             </p>
                         </div>
@@ -70,8 +70,11 @@ const OrderConfirmation = () => {
                                     </p>
                                 </div>
                                 <div className="ml-auto text-right">
-                                    <p>₹ {item.price.toLocaleString()}</p>
-                                    <p className="text-sm text-gray-600">Quantity: {item.quantity }</p>
+                                    {/* Always use stored price */}
+                                    <p>₹{((item.discountPrice ?? item.price) * item.quantity).toFixed(2)}</p>
+                                    <p className="text-sm text-gray-600">
+                                        Quantity: {item.quantity}
+                                    </p>
                                 </div>
                             </div>
                         ))}
@@ -81,7 +84,7 @@ const OrderConfirmation = () => {
                     <div className="grid grid-cols-2 gap-8">
                         <div>
                             <h4 className=" text-lg font-semibold mb-2">Payment</h4>
-                            <p className="text-gray-600">PayPal</p>
+                            <p className="text-gray-600">{checkout.paymentMethod || "N/A"}</p>
                         </div>
 
                         {/* Delivery info */}
@@ -91,7 +94,7 @@ const OrderConfirmation = () => {
                                 {checkout.shippingAddress.address}
                             </p>
                             <p className="text-gray-600">
-                                {checkout.shippingAddress.city}, {""}
+                                {checkout.shippingAddress.city},{" "}
                                 {checkout.shippingAddress.country}
                             </p>
                         </div>

@@ -1,16 +1,15 @@
-import React from 'react'
-import { FaBoxOpen, FaClipboardList, FaSignOutAlt, FaStore, FaUser } from 'react-icons/fa'
+import { FaBoxOpen, FaClipboardList, FaSignOutAlt, FaStore, FaPlusCircle   } from 'react-icons/fa'
 import { useDispatch } from 'react-redux';
 import { Link, NavLink, useNavigate } from 'react-router-dom'
-import { logout } from '../../redux/slices/authSlice';
 import { clearCart } from '../../redux/slices/cartSlice';
+import { logoutUser } from '../../redux/slices/authSlice';
 
 const AdminSidebar = () => {
     const navigate = useNavigate();
     const dispatch = useDispatch();
 
     const handleLogout = () => {
-        dispatch(logout());
+        dispatch(logoutUser());
         dispatch(clearCart());
         navigate("/")
     }
@@ -19,22 +18,22 @@ const AdminSidebar = () => {
         <div className="p-6">
             <div className="mb-6">
                 <Link to="/admin" className="text-2xl font-medium">
-                    Trends
+                    TrendsWave
                 </Link>
             </div>
             <h2 className="text-xl font-medium mb-6 text-center">Admin Dashboard</h2>
 
             <nav className="flex flex-col space-y-2">
                 <NavLink
-                    to="/admin/users"
+                    to="/admin/addProduct"
                     className={({ isActive }) => 
                         isActive
                             ? "bg-gray-700 text-white py-3 px-4 rounded flex items-center space-x-2"
                             : "text-gray-300 hover:bg-gray-700 hover:text-white py-3 px-4 rounded flex items-center space-x-2"
                     }
                 >
-                    <FaUser />
-                    <span>Users</span>
+                    <FaPlusCircle   />
+                    <span>Add Product</span>
                 </NavLink>
 
                 {/* NavLink ek special version hota hai Link ka (React Router se).
@@ -46,7 +45,7 @@ const AdminSidebar = () => {
                 tab isactive = true hoga then products wale option pe bg-gray rahega and baaki saare option pe hover rahega  */}
 
                 <NavLink
-                    to="/admin/products"
+                    to="/admin/allProducts"
                     className={({ isActive }) => 
                         isActive
                             ? "bg-gray-700 text-white py-3 px-4 rounded flex items-center space-x-2"
@@ -54,7 +53,7 @@ const AdminSidebar = () => {
                     }
                 >
                     <FaBoxOpen />
-                    <span>Products</span>
+                    <span>Manage Products</span>
                 </NavLink>
 
                 <NavLink

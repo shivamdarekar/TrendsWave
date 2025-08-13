@@ -22,12 +22,23 @@ const checkoutItemSchema = new mongoose.Schema({
         required: true
     },
 
+    discountPrice: {
+        type: Number,
+    },
+
+
     quantity: {
         type: Number,
         required: true
     },
     size: String,
     color: String,
+
+    owner: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Product",
+        required:true
+    }
 },
     { _id: false }
 );

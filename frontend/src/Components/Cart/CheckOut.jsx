@@ -27,10 +27,13 @@ const Checkout = () => {
 
     //ensure cart is loaded before proceeding
     useEffect(() => {
-        if (!cart && !cart.products || cart.products.length == 0) {
-            navigate("/");
+        if (!cart || !cart.products || cart.products.length == 0) {
+            return navigate("/",{replace:true});
         }
-    }, [cart, navigate])
+        if (!user) {
+            return navigate("/login",{replace:true})
+        }
+    }, [cart, navigate,user])
 
     const handleCreateCheckout = async (e) => {
         e.preventDefault(); //page ko reload nahi karega
@@ -42,7 +45,7 @@ const Checkout = () => {
                     paymentMethod: "Paypal",
                     totalPrice: cart.totalPrice
                 })
-            );
+            )
             if (res.payload && res.payload._id) {
                 setCheckoutId(res.payload._id) //set checkout id if checkout was successfull
             }
@@ -53,41 +56,35 @@ const Checkout = () => {
         try {
             const response = await axios.put(
                 `${import.meta.env.VITE_BACKEND_URL}/api/checkout/${checkoutId}/pay`,
-                { paymentStatus: "paid", paymentDetails: details },
-                {
-                    headers: {
-                        Authorization: `Bearer ${localStorage.getItem("userToken")}`,
-                    }
-                }
+                { paymentStatus: "paid", paymentDetails: details }
             );
             if (response.status === 200) {
                 await handleFinalizeCheckout(checkoutId); //finalize checkout if payment was successfull
             } else {
-                console.error(error);
+                console.error("Payment update failed with status:", response.status);
+                alert("Payment update failed. Please try again.");
             }
         } catch (error) {
-            console.error(error);
+            console.error("An error occurred during payment update:", error);
+            alert("Payment update failed. Please try again.");
         }
     };
 
     const handleFinalizeCheckout = async (checkoutId) => {
         try {
+            // The backend should respond with the newly created order object
             const response = await axios.post(
                 `${import.meta.env.VITE_BACKEND_URL}/api/checkout/${checkoutId}/finalize`,
-                {},
-                {
-                    headers: {
-                        Authorization: `Bearer ${localStorage.getItem("userToken")}`,
-                    }
-                }
+                {}
             );
             if (response.status === 201) {
-                navigate("/order-confirmation")
+                navigate("/order-confirmation");
             } else {
-                console.error(error);
+                alert("There was an issue confirming your order. Please contact support.");
             }
         } catch (error) {
-            console.error(error);
+            console.error("An error occurred during order finalization:", error);
+            alert("There was an issue confirming your order. Please contact support.");
         }
     }
 
@@ -181,7 +178,7 @@ const Checkout = () => {
                         <div>
                             <label className="block text-gray-700">Pin Code</label>
                             <input
-                                type="text"
+                                type="number"
                                 value={shippingAddress.postalCode}
                                 onChange={(e) =>
                                     setShippingAddress({ ...shippingAddress, postalCode: e.target.value })
@@ -208,7 +205,7 @@ const Checkout = () => {
                     <div className="mb-4">
                         <label className="block text-gray-700">Phone</label>
                         <input
-                            type="tel"
+                            type="number"
                             value={shippingAddress.phone}
                             onChange={(e) =>
                                 setShippingAddress({ ...shippingAddress, phone: e.target.value })
@@ -271,7 +268,10 @@ const Checkout = () => {
                                     <p className="text-gray-500">Color:{product.color}</p>
                                 </div>
                             </div>
-                            <p className="text-xl">₹{product.price}</p>
+                            <div>
+                                <p className="text-xl">₹{product.discountPrice ? product.discountPrice : product.price}</p>
+                            <p className="text-gray-600 py-1">Quantity: {product.quantity}</p>
+                            </div>
                         </div>
                     ))}
                 </div>

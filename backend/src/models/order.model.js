@@ -29,6 +29,12 @@ const orderItemSchema = new mongoose.Schema({
         type: Number,
         required: true
     },
+
+    owner: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Product",
+        required:true
+    }
 },
     { _id: false }
 );
@@ -82,6 +88,10 @@ const orderSchema = new mongoose.Schema({
         type: String,
         default: "pending"
     },
+
+    paymentDetails: {
+           type: mongoose.Schema.Types.Mixed, //store payment related details(transaction ID, paypal response)
+       },
 
     status: {
         type: String,

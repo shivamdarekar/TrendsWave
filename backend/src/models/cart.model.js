@@ -10,6 +10,7 @@ const cartItemSchema = new mongoose.Schema({
     name: String,
     image: String,
     price: String,
+    discountPrice: String,
     size: String,
     color: String,
 
@@ -17,6 +18,11 @@ const cartItemSchema = new mongoose.Schema({
         type: Number,
         default: 1,
     },
+    owner: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Product",
+        required:true
+    }
 },
     { _id: false }
 );

@@ -1,4 +1,4 @@
-import { useState,useEffect } from "react"
+import { useState, useEffect } from "react"
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import login from "../assets/login.webp"
 import { loginUser } from "../redux/slices/authSlice.js";
@@ -25,14 +25,14 @@ const Login = () => {
         if (user) {
             if (cart?.products.length > 0 && guestId) {
                 dispatch(mergeCart({ guestId, user })).then(() => {
-                    navigate(isCheckoutRedirect ? "/checkout" : "/");
+                    navigate(isCheckoutRedirect ? "/checkout" : "/",{replace:true});
                 });
             } else {
-                navigate(isCheckoutRedirect ? "/checkout" : "/");
+                navigate(isCheckoutRedirect ? "/checkout" : "/",{replace:true});
             }
         }
     }, [user, guestId, cart, navigate, isCheckoutRedirect, dispatch]);
-    
+
     const handleSubmit = async (e) => {
         e.preventDefault();  //Stops the page from refreshing when the form is submitted.
         setLoginError("");
@@ -127,11 +127,11 @@ const Login = () => {
                         Want to sell on TrendsWave? Become a Seller
                     </button>
 
-                    <p className="mt-6 text-center text-sm">
+                    <p className="mt-5 text-center text-sm">
                         Don't have an account? {""}
                         <Link
                             to={`/register?redirect=${encodeURIComponent(redirect)}`}
-                            className="text-blue-500"
+                            className="text-blue-600"
                         >
                             Register
                         </Link>

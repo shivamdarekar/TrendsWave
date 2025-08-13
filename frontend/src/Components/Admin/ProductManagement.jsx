@@ -11,25 +11,29 @@ const ProductManagement = () => {
 
     const { products, loading, error } = useSelector((state) => state.adminProducts)
     const { user } = useSelector((state) => state.auth);
-    
+
     useEffect(() => {
-        if (!user || user.role !== "admin") {
-            navigate("/");
-        } else {
+        if (user?.role == "admin") {
             dispatch(fetchAdminProducts());
-        }
+        } else {
+            navigate("/")
+        };
     }, [dispatch, user, navigate]);
 
-    const handleDelete = async(id) => {
+    const handleDelete = async (id) => {
         if (window.confirm("Are you sure you want to delete the Product")) {
-              try {
-            await dispatch(deleteProduct(id)).unwrap();
-            toast.success("User deleted successfully!",{duration:1000});
-        } catch {
-            toast.error("Failed to delete user.", {duration:1000});
-        }
+            try {
+                await dispatch(deleteProduct(id)).unwrap();
+                toast.success("Product deleted successfully!", { duration: 1000 });
+            } catch {
+                toast.error("Failed to delete a Product.", { duration: 1000 });
+            }
         }
     };
+
+    const handleRowClick = (productId) => {
+        navigate(`/product/${productId}`);
+    }
 
     if (loading) return <p className='text-center'>Loading...</p>
     if (error) return <p className='text-center'>Error: {error}</p>
@@ -55,10 +59,11 @@ const ProductManagement = () => {
                                     key={product._id}
                                     className="border-b hover:bg-gray-50 cursor-pointer"
                                 >
-                                    <td className="p-4 font-medium text-gray-900 whitespace-nowrap">
+                                    <td className="p-4 font-medium text-gray-900 whitespace-nowrap hover:underline"
+                                        onClick={() => handleRowClick(product._id)}>
                                         {product.name}
                                     </td>
-                                    <td className="p-4">₹{product.price}</td>
+                                    <td className="p-4">₹{(product.discountPrice ? product.discountPrice : product.price).toFixed(2)}</td>
                                     <td className="p-4">{product.sku}</td>
                                     <td className="p-4">
                                         <Link

@@ -14,7 +14,7 @@ const Hero = () => {
             {/* Hero Content */}
             <div className="absolute inset-0 bg-black bg-opacity-30 flex items-center justify-center">
                 <div className="text-center text-white px-6">
-                    <h1 className=" text-5xl md:text-7xl font-bold uppercase tracking-wide mb-4">
+                    <h1 className="text-5xl md:text-7xl font-bold uppercase tracking-wide mb-4">
                         Vacation <br /> Ready
                     </h1>
                     <p className="text-base md:text-lg mb-6 text-shadow">

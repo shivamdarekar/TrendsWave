@@ -99,7 +99,7 @@ const productSchema = new mongoose.Schema({
     },
 
     tags: [String],
-    user: {
+    owner: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "User",
         required: true

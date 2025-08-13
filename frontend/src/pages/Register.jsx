@@ -27,10 +27,10 @@ const Register = () => {
         if (user) {
             if (cart?.products.length > 0 && guestId) {
                 dispatch(mergeCart({ guestId, user })).then(() => {
-                    navigate(isCheckoutRedirect ? "/checkout" : "/");
+                    navigate(isCheckoutRedirect ? "/checkout" : "/",{replace:true});
                 });
             } else {
-                navigate(isCheckoutRedirect ? "/checkout" : "/");
+                navigate(isCheckoutRedirect ? "/checkout" : "/",{replace:true});
             }
         }
     }, [user, guestId, cart, navigate, isCheckoutRedirect, dispatch]);
@@ -142,11 +142,11 @@ const Register = () => {
                     </button>
 
 
-                    <p className="mt-6 text-center text-sm">
+                    <p className="mt-5 text-center text-sm">
                         Already registered? {""}
                         <Link
                             to={`/login?redirect=${encodeURIComponent(redirect)}`}
-                            className="text-blue-500"
+                            className="text-blue-600"
                         >
                             Login
                         </Link>

@@ -1,26 +1,23 @@
-import React, { useEffect, useState } from "react";
+import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useNavigate, useParams } from "react-router-dom";
-import { fetchProductForEdit, updateProduct } from "../../redux/slices/productsSlice";
-import { toast } from "sonner";
+import { createProduct } from "../../redux/slices/adminProductSlice";
 import { uploadImage } from "../../redux/slices/uploadSlice";
+import { toast } from "sonner";
 import { resetUpload } from "../../redux/slices/uploadSlice";
 
-const EditProductPage = () => {
+const AddProduct = () => {
 
   const dispatch = useDispatch();
-  const navigate = useNavigate();
-  const { id } = useParams();
 
-  const { selectedProduct, loading, error } = useSelector((state) => state.products);
-    const { uploading } = useSelector((state) => state.upload);
+  const { loading, error } = useSelector((state) => state.adminProducts);
+  const { uploading } = useSelector((state) => state.upload);
 
   //Yeh state form ke saare inputs ka data hold karega. Form submit hone pe yahi data send hoga.
   const [productData, setProductData] = useState({
     name: "",
     description: "",
     price: "",
-    discountPrice:"",
+    discountPrice: "",
     countInStock: "",
     sku: "",
     category: "",
@@ -32,23 +29,6 @@ const EditProductPage = () => {
     gender: "",
     images: [],
   });
- 
-  useEffect(() => {
-    if (id) {
-      dispatch(fetchProductForEdit(id))
-      .unwrap()
-      .catch(() => {
-        //toast.error(err.message || "Not authorized",{duration:1500});
-        navigate("/404", {replace:true});
-      });
-    }
-    }, [dispatch, id,navigate]);
-
-  useEffect(() => {
-    if (selectedProduct) {
-      setProductData(selectedProduct);
-    }
-  },[selectedProduct])
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -56,40 +36,59 @@ const EditProductPage = () => {
   };
 
   const handleImageUpload = async (e) => {
-      const file = e.target.files[0];
-      if (!file) return;
-  
-      try {
-        const result = await dispatch(uploadImage(file)).unwrap();
-        setProductData((prevData) => ({
-          ...prevData,
-          images: [...prevData.images, { url: result, altText: "" }],
-        }));
-        dispatch(resetUpload());
-      } catch  {
-        toast.error("Image upload failed", { duration: 1000 });
-      }
-    };
+    const file = e.target.files[0];
+    if (!file) return;
 
-  const handleSubmit = async(e) => {
+    try {
+      const result = await dispatch(uploadImage(file)).unwrap();
+      setProductData((prevData) => ({
+        ...prevData,
+        images: [...prevData.images, { url: result, altText: "" }],
+      }));
+      dispatch(resetUpload());
+    } catch (err) {
+      toast.error(err || "Image upload failed", { duration: 1000 });
+    }
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
     //console.log(productData);
     try {
-      await dispatch(updateProduct({ id, productData })).unwrap();
-      toast.success("Product updated successfully!", { duration: 1000 });
-      navigate("/admin/allProducts")
+      await dispatch(createProduct({ productData })).unwrap();
+      toast.success("Product added successfully!", { duration: 1000 });
+
+      //Reset form
+      setProductData({
+        name: "",
+        description: "",
+        price: "",
+        discountPrice: "",
+        countInStock: "",
+        sku: "",
+        category: "",
+        brand: "",
+        sizes: [],
+        colors: [],
+        collections: "",
+        material: "",
+        gender: "",
+        images: [],
+      });
+
+      //can we directly use initial state which is empty from slice
+
     } catch {
-      // Display a more specific error message from the backend if available
-      toast.error("Failed to update Product.", {duration:2000});
+      toast.error("Failed to add a Product.", {duration:1000});
     }
   }
 
-  if (loading) return <p className="text-center">Loading...</p>;
-if (error) return <p className="text-center">Error: {error}</p>;
+  if (loading) return <p className="text-center">Loading...</p>
+  if (error) return <p className="text-center">Error: {error}</p>
 
   return (
     <div className="max-w-full mx-auto p-6 shadow-md rounded-md">
-      <h2 className="text-3xl font-bold mb-6">Edit Product</h2>
+      <h2 className="text-3xl font-bold mb-6">Add Product</h2>
       <form onSubmit={handleSubmit}>
         {/* Name */}
         <div className="mb-6">
@@ -126,6 +125,7 @@ if (error) return <p className="text-center">Error: {error}</p>;
             value={productData.price}
             onChange={handleChange}
             className="w-full border border-gray-300 rounded-md p-2"
+            required
           />
         </div>
 
@@ -150,6 +150,33 @@ if (error) return <p className="text-center">Error: {error}</p>;
             value={productData.countInStock}
             onChange={handleChange}
             className="w-full border border-gray-300 rounded-md p-2"
+            required
+          />
+        </div>
+
+        {/* Category */}
+        <div className="mb-6">
+          <label className="block font-semibold mb-2">Category</label>
+          <input
+            type="text"
+            name="category"
+            value={productData.category}
+            onChange={handleChange}
+            className="w-full border border-gray-300 rounded-md p-2"
+            required
+          />
+        </div>
+
+        {/* Brand */}
+        <div className="mb-6">
+          <label className="block font-semibold mb-2">Brand</label>
+          <input
+            type="text"
+            name="brand"
+            value={productData.brand}
+            onChange={handleChange}
+            className="w-full border border-gray-300 rounded-md p-2"
+            required
           />
         </div>
 
@@ -177,6 +204,7 @@ if (error) return <p className="text-center">Error: {error}</p>;
               sizes: e.target.value.split(",").map((size) => size.trim()),
             })}
             className="w-full border border-gray-300 rounded-md p-2"
+            required
           />
         </div>
 
@@ -192,6 +220,44 @@ if (error) return <p className="text-center">Error: {error}</p>;
               colors: e.target.value.split(",").map((color) => color.trim()),
             })}
             className="w-full border border-gray-300 rounded-md p-2"
+            required
+          />
+        </div>
+
+        {/* Collections */}
+        <div className="mb-6">
+          <label className="block font-semibold mb-2">Collections</label>
+          <input
+            type="text"
+            name="collections"
+            value={productData.collections}
+            onChange={handleChange}
+            className="w-full border border-gray-300 rounded-md p-2"
+          />
+        </div>
+
+        {/* Material */}
+        <div className="mb-6">
+          <label className="block font-semibold mb-2">Material</label>
+          <input
+            type="text"
+            name="material"
+            value={productData.material}
+            onChange={handleChange}
+            className="w-full border border-gray-300 rounded-md p-2"
+          />
+        </div>
+
+        {/* Gender */}
+        <div className="mb-6">
+          <label className="block font-semibold mb-2">Gender</label>
+          <input
+            type="text"
+            name="gender"
+            value={productData.gender}
+            onChange={handleChange}
+            className="w-full border border-gray-300 rounded-md p-2"
+            required
           />
         </div>
 
@@ -220,11 +286,11 @@ if (error) return <p className="text-center">Error: {error}</p>;
           type="submit"
           className="w-full bg-green-500 text-white py-2 rounded-md hover:bg-green-600 transition-colors"
         >
-          Update Product
+          Add Product
         </button>
       </form>
     </div>
   );
 };
 
-export default EditProductPage;
+export default AddProduct;

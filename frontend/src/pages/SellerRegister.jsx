@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { registerUser } from '../redux/slices/authSlice.js';
 import { useDispatch, useSelector } from 'react-redux';
@@ -7,8 +7,14 @@ const SellerRegister = () => {
     const [passwordError, setPasswordError] = useState("");
     const [emailError, setEmailError] = useState("");
     const dispatch = useDispatch();
-    const { loading } = useSelector((state) => state.auth);
+    const { loading,user } = useSelector((state) => state.auth);
     const navigate = useNavigate();
+
+    useEffect(() => {
+        if (user) {
+            navigate("/",{replace:true});
+        }
+    }, [navigate, user]);
 
     const [formData, setFormData] = useState({
         name: "",
@@ -42,7 +48,7 @@ const SellerRegister = () => {
 
         try {
             await dispatch(registerUser({ name, email, password, role: "admin" })).unwrap();
-            navigate("/");
+            navigate("/",{replace:true});
         } catch (error) {
             console.error("Registration failed:", error);
 

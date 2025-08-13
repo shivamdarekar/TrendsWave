@@ -13,16 +13,16 @@ import OrderDetails from "./pages/OrderDetails.jsx"
 import MyOrdersPage from "./pages/MyOrdersPage.jsx"
 import AdminLayout from "./Components/Admin/AdminLayout.jsx"
 import AdminHomePage from "./Components/Admin/AdminHomePage.jsx"
-import UserManagement from "./Components/Admin/UserManagement.jsx"
 import ProductManagement from "./Components/Admin/ProductManagement.jsx"
 import EditProductPage from "./Components/Admin/EditProductPage.jsx"
 import OrderManagement from "./Components/Admin/OrderManagement.jsx"
+import AddProduct from "./Components/Admin/AddProduct.jsx"
+import NotFound from "./pages/NotFound.jsx"
 
 import { Provider } from "react-redux";
 import store from "./redux/store.js"
 import ProtectedRoute from "./Components/Common/ProtectedRoute.jsx"
 import SellerRegister from "./pages/SellerRegister.jsx"
-
 
 function App() {
   return (
@@ -52,18 +52,20 @@ function App() {
               <AdminLayout />
             </ProtectedRoute>}>
             <Route index element={<AdminHomePage />} />
-            <Route path="users" element={<UserManagement />} />
-            <Route path="products" element={<ProductManagement />} />
+            <Route path="addProduct" element={<AddProduct />} />
+            <Route path="allProducts" element={<ProductManagement />} />
             <Route path="products/:id/edit" element={<EditProductPage />} />
             <Route path="orders" element={<OrderManagement />} />
           </Route>
 
+          {/* 404 route should be LAST */}
+          <Route path="/404" element={<NotFound />} />
+          <Route path="*" element={<NotFound />} />
+
         </Routes>
+      
       </BrowserRouter>
     </Provider>
   )
 }
 export default App
-
-
-

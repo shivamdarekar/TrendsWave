@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
 
 const userSchema = new mongoose.Schema({
     
@@ -28,6 +29,9 @@ const userSchema = new mongoose.Schema({
         enum: ["customer", "admin"],
         default: "customer"
     },
+    refreshToken: {
+        
+    },
 },
     { timestamps: true }
 );
@@ -44,5 +48,28 @@ userSchema.pre("save", async function (next) {
 userSchema.methods.matchPassword = async function (enteredPassword) {
     return await bcrypt.compare(enteredPassword, this.password);
 };
+
+userSchema.methods.generateAccessToken = function () {
+    //short live access token
+    return jwt.sign({  //create jwt
+        _id: this._id,
+        email: this.email,
+        name: this.name,
+        role: this.role
+    },
+        process.env.Access_Token_Secret,
+        { expiresIn: process.env.Access_Token_Expiry }
+    )
+};
+
+userSchema.methods.generateRefreshToken = function () {
+    //long live token
+    return jwt.sign({
+        _id: this._id
+    },
+        process.env.Refresh_Token_Secret,
+        {expiresIn:process.env.Refresh_Token_Expiry}
+    )
+}
 
 export const User = mongoose.model("User", userSchema)

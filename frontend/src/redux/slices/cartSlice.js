@@ -1,6 +1,8 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 
+axios.defaults.withCredentials = true;
+
 //helper f:n to load cart from local storage
 const loadCartFromStorage = () => {
   const storedCart = localStorage.getItem("cart");
@@ -47,7 +49,7 @@ export const addToCart = createAsyncThunk(
           size,
           color,
           guestId,
-          userId,
+          userId
         }
       );
       return response.data;
@@ -108,11 +110,6 @@ export const mergeCart = createAsyncThunk(
             const response = await axios.post(
                 `${import.meta.env.VITE_BACKEND_URL}/api/cart/merge`,
                 { guestId, user },
-                {
-                    headers: {
-                        Authorization: `Bearer ${localStorage.getItem("userToken")}`,
-                    }
-                }
             );
             return response.data;
         } catch (error) {
@@ -148,7 +145,7 @@ const cartSlice = createSlice({
             })
             .addCase(fetchCart.rejected, (state, action) => {
                 state.loading = false;
-                state.error = action.error.message || "Failed to fetch cart";
+                state.error = action.payload?.message || "Failed to fetch cart";
             })
             
             //add to cart

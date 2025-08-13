@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import ProductGrid from "./ProductGrid";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchProductDetails, fetchSimilarProducts } from "../../redux/slices/productsSlice";
 import { addToCart } from "../../redux/slices/cartSlice";
@@ -42,6 +42,7 @@ import { addToCart } from "../../redux/slices/cartSlice";
 const ProductDetails = ({ productId }) => {
 
     const { id } = useParams();
+    const navigate = useNavigate();
     const dispatch = useDispatch();
     const { selectedProduct, loading, error, similarProduct } = useSelector(
         (state) => state.products
@@ -57,11 +58,20 @@ const ProductDetails = ({ productId }) => {
     const productFetchId = productId || id;
 
     useEffect(() => {
-        if (productFetchId) {
-            dispatch(fetchProductDetails(productFetchId));
-            dispatch(fetchSimilarProducts(productFetchId));
+        if (!productFetchId) {
+            return navigate("/404")
         }
-    }, [dispatch, productFetchId]);
+            dispatch(fetchProductDetails(productFetchId)).unwrap()
+            .then(() => {
+                dispatch(fetchSimilarProducts(productFetchId));
+            })
+            .catch((err) => {
+                if (err.status === 404 || err.status === 500) {
+                    return navigate("/404",{replace:true});
+                }
+            });
+        
+    }, [dispatch, productFetchId,navigate]);
 
     //if product has more than one images select 1st image as main image
     //use effect - Iska use tab hota hai jab page load hone ke baad kuch kaam karna ho (jaise default image set karna).
@@ -116,11 +126,11 @@ const ProductDetails = ({ productId }) => {
     };
 
     if (loading) {
-        return <p>Loading...</p>
+         <p className="text-center">Loading...</p>
     }
 
     if (error) {
-        return <p>Error: {error}</p>
+         <p className="text-center">Error: {error}</p>
     }
 
     return (
@@ -177,23 +187,33 @@ const ProductDetails = ({ productId }) => {
                             </h1>
 
                             <div className="flex items-baseline gap-2 mb-2">
-                                {/* Discounted Price */}
-                                <p className="text-2xl font-semibold text-gray-900">
-                                    ₹{selectedProduct.discountPrice}
-                                </p>
+                                {selectedProduct.discountPrice && selectedProduct.discountPrice < selectedProduct.price ? (
+                                    <>
+                                        {/* Discounted Price */}
+                                        <p className="text-2xl font-semibold text-gray-900">
+                                            ₹{selectedProduct.discountPrice.toLocaleString()}
+                                        </p>
 
-                                {/* MRP (Original Price) */}
-                                <p className="text-base text-gray-500 line-through">
-                                    MRP ₹{selectedProduct.price}
-                                </p>
+                                        {/* MRP (Original Price) */}
+                                        <p className="text-base text-gray-500 line-through">
+                                            MRP ₹{selectedProduct.price.toLocaleString()}
+                                        </p>
 
-                                {/* Discount Percentage */}
-                                <span className="text-base font-semibold text-orange-500">
-                                    ({Math.round(
-                                        ((selectedProduct.price - selectedProduct.discountPrice) / selectedProduct.price) * 100
-                                    )}% OFF)
-                                </span>
+                                        {/* Discount Percentage */}
+                                        <span className="text-base font-semibold text-orange-500">
+                                            ({Math.round(
+                                                ((selectedProduct.price - selectedProduct.discountPrice) / selectedProduct.price) * 100
+                                            )}% OFF)
+                                        </span>
+                                    </>
+                                ) : (
+                                    // Only Price (No Discount)
+                                    <p className="text-2xl font-semibold text-gray-900">
+                                        ₹{selectedProduct.price.toLocaleString()}
+                                    </p>
+                                )}
                             </div>
+
 
                             {/* Optional: Taxes note */}
                             <p className="text-sm text-green-600 mb-2">inclusive of all taxes</p>

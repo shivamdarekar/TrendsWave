@@ -4,6 +4,8 @@ import { Product } from "./models/product.model.js";
 import { User } from "./models/user.model.js";
 import products from "./data/products.js";
 import { Cart } from "./models/cart.model.js";
+import { Checkout } from "./models/checkout.model.js";
+import { Order } from "./models/order.model.js";
 
 dotenv.config();
 
@@ -18,6 +20,9 @@ const seedData = async () => {
         await Product.deleteMany();
         await User.deleteMany();
         await Cart.deleteMany();
+        await Order.deleteMany();
+        await Checkout.deleteMany();
+
 
         //create a default admin user
         const createdUser = await User.create({
@@ -31,7 +36,7 @@ const seedData = async () => {
         const userID = createdUser._id;
 
         const sampleProducts = products.map((product) => {
-            return { ...product, user:userID }
+            return { ...product, owner:userID }
         });
 
         //insert the product data in databse
@@ -41,7 +46,7 @@ const seedData = async () => {
         process.exit();  //existed successfully
 
     } catch (error) {
-        console.error("Error while seeding the data");
+        console.error("Error while seeding the data",error);
         process.exit(1); //exit with error
         
     }
