@@ -126,58 +126,6 @@ router.put("/:id/pay", protect, async (req, res) => {
 //   }
 // });
 
-//code without if else
-// router.post("/:id/finalize", protect, async (req, res) => {
-//   try {
-//     const checkout = await Checkout.findById(req.params.id);
-
-//     if (!checkout) {
-//       return res.status(404).json({ message: "Checkout session not found." });
-//     }
-
-//     // Make sure the checkout belongs to the logged-in user
-//     if (checkout.user.toString() !== req.user._id.toString()) {
-//       return res.status(403).json({ message: "Unauthorized to finalize this checkout." });
-//     }
-
-//     if (!checkout.isPaid) {
-//       return res.status(400).json({ message: "Checkout is not marked as paid yet." });
-//     }
-
-//     if (checkout.isFinalized) {
-//       return res.status(400).json({ message: "This checkout has already been finalized." });
-//     }
-
-//     const finalOrder = await Order.create({
-//       user: checkout.user,
-//       orderItems: checkout.checkoutItems,
-//       shippingAddress: checkout.shippingAddress,
-//       paymentMethod: checkout.paymentMethod,
-//       totalPrice: checkout.totalPrice,
-//       isPaid: true,
-//       paidAt: checkout.paidAt,
-//       isDelivered: false,
-//       paymentStatus: "paid",
-//       paymentDetails: checkout.paymentDetails,
-//     });
-
-//     checkout.isFinalized = true;
-//     checkout.finalizeAt = new Date();
-//     await checkout.save();
-
-//     // Clean up user's cart
-//     await Cart.findOneAndDelete({ user: checkout.user });
-
-//     return res.status(201).json({
-//       message: "Order successfully created from checkout.",
-//       order: finalOrder,
-//     });
-
-//   } catch (error) {
-//     console.error("Finalize error:", error.message);
-//     return res.status(500).json({ message: "Server error while finalizing checkout." });
-//   }
-// });
 
 router.post("/:id/finalize", protect, async (req, res) => {
   try {
@@ -204,7 +152,7 @@ router.post("/:id/finalize", protect, async (req, res) => {
 
     // BUILD ORDER ITEMS — **freeze the paid price** here
     const orderItems = checkout.checkoutItems.map((item) => {
-      const paidUnitPrice = (typeof item.discountPrice === "number" && item.discountPrice >= 0)
+      const paidUnitPrice = (typeof item.discountPrice === "number" && item.discountPrice > 0)
         ? item.discountPrice
         : item.price;
 

@@ -34,12 +34,12 @@ const CartDrawer = ({ drawerOpen, toggleCartDrawer }) => {
 
 
             {/* Cart content with scrollable area */}
-            <div className="flex-grow p-4 overflow-y-auto">
+            <div className="flex-grow md:p-4 p-1 overflow-y-auto">
                 <h2 className="text-xl font-semibold mb-4">Your Cart</h2>
                 {cart && cart?.products?.length > 0 ? (
                     <CartContents cart={cart} userId={userId} guestId={guestId} />
                 ) : (
-                    <p className="text-gray-500">Your cart is empty.</p>
+                    <p className="text-gray-600">Your cart is empty.</p>
                 )}
             </div>
 

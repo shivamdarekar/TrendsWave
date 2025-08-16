@@ -36,7 +36,7 @@ const Profile = () => {
                         <h1 className="text-2xl md:text-3xl font-bold mb-4">
                             {user?.name}
                         </h1>
-                        <p className="text-lg text-gray-600 mb-4">
+                        <p className="text-lg text-gray-600 mb-4 truncate max-w-full">
                             {user?.email}
                         </p>
                         <button

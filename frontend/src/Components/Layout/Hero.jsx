@@ -8,7 +8,7 @@ const Hero = () => {
             <img
                 src={heroImg}
                 alt="TrendsWave"
-                className="w-full h-[350px] md:h-[400px] lg:h-[600px] md:object-cover "
+                className="w-full h-[350px] md:h-[450px] lg:h-[600px] md:object-cover "
             />
 
             {/* Hero Content */}

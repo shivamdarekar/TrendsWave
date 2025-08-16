@@ -67,7 +67,7 @@ const OrderManagement = () => {
                   <td className="p-4">{order?.user?.name || "Guest"}</td>
 
                   {/* Total Price */}
-                  <td className="p-4">₹{order.totalPrice?.toFixed(2) || "0.00"}</td>
+                  <td className="p-4">₹{order.totalPrice || "0.00"}</td>
 
                   {/* Status Dropdown */}
                   <td className="p-4">

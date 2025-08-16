@@ -35,7 +35,7 @@ const Navbar = () => {
 
                 {/* left-logo */}
                 <div>
-                    <Link to="/" className=" text-xl sm:text-2xl font-medium mr-4 ">
+                    <Link to="/" className=" text-xl sm:text-2xl font-medium md:mr-auto mr-4 traking- ">
                         TrendsWave
                     </Link>
                 </div>

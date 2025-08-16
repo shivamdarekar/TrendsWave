@@ -81,8 +81,8 @@ const OrderDetails = () => {
               <p>Shipping Method : {orderDetails.shippingAddress?.shippingMethod || "N/A"}</p>
               <p>
                 Address:{" "}
-                {orderDetails.shippingAddress && orderDetails.shippingAddress.city && orderDetails.shippingAddress.country
-                  ? `${orderDetails.shippingAddress.city}, ${orderDetails.shippingAddress.country}`
+                {orderDetails.shippingAddress && orderDetails.shippingAddress.district && orderDetails.shippingAddress.state && orderDetails.shippingAddress.country
+                  ? `${orderDetails.shippingAddress.address}, ${orderDetails.shippingAddress.district}, ${orderDetails.shippingAddress.state}`
                   : "No shipping address"}
               </p>
             </div>
@@ -120,7 +120,7 @@ const OrderDetails = () => {
                     {/* Use the frozen price stored in order item */}
                     <td className="py-3 px-4 text-center">₹{(item.price).toFixed(2)}</td>
                     <td className="py-3 px-4 text-center">{item.quantity}</td>
-                    <td className="py-3 px-4 text-center">₹{(item.price * item.quantity).toFixed(2)}</td>
+                    <td className="py-3 px-4 text-center">₹{(item.price * item.quantity)}</td>
                   </tr>
                 ))}
               </tbody>
@@ -130,7 +130,7 @@ const OrderDetails = () => {
           {/* Totals */}
           <div className="mt-3 text-right mb-">
             <div className="md:text-lg font-semibold">
-              Order Total: ₹{(calcOrderTotalFromItems(orderDetails.orderItems)).toFixed(2)}
+              Order Total: ₹{(calcOrderTotalFromItems(orderDetails.orderItems))}
             </div>
           </div>
 

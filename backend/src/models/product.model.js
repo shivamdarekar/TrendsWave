@@ -1,131 +1,135 @@
 import mongoose from "mongoose";
 
-const productSchema = new mongoose.Schema({
+const productSchema = new mongoose.Schema(
+  {
     name: {
-        type: String,
-        required: true,
-        trim: true
+      type: String,
+      required: true,
+      trim: true,
     },
 
     description: {
-        type: String,
-        required: true,
+      type: String,
+      required: true,
     },
 
     price: {
-        type: Number,
-        required: true,
+      type: Number,
+      required: true,
     },
 
     discountPrice: {
-        type: Number
+      type: Number,
+      default:null
     },
 
     countInStock: {
-        type: Number,
-        required: true,
-        default: 0
+      type: Number,
+      required: true,
+      default: 0,
     },
 
     sku: {
-        type: String,
-        unique: true,
-        required: true,
+      type: String,
+      required: true,
     },
 
     category: {
-        type: String,
-        required: true
+      type: String,
+      required: true,
     },
 
     brand: {
-        type: String
+      type: String,
     },
 
     sizes: {
-        type: [String],
-        required: true,
+      type: [String],
+      required: true,
     },
 
     colors: {
-        type: [String],
-        requires: true,
+      type: [String],
+      requires: true,
     },
 
     collections: {
-        type: String,
-        required: true
+      type: String,
+      required: true,
     },
 
     material: {
-        type: String,
+      type: String,
     },
 
     gender: {
-        type: String,
-        enum: ["Men", "Women", "Unisex"],
+      type: String,
+      enum: ["Men", "Women", "Unisex"],
     },
 
     images: [
-        {
-            url: {
-                type: String,
-                required: true
-            },
-            altText: {
-                type: String,
-            },
+      {
+        url: {
+          type: String,
+          required: true,
         },
+        publicId: {
+          type: String,
+          required: true,
+        },
+        altText: {
+          type: String,
+        },
+      },
     ],
 
     isFeatured: {
-        type: Boolean,
-        default: false
+      type: Boolean,
+      default: false,
     },
 
     isPublished: {
-        type: Boolean,
-        default: false
+      type: Boolean,
+      default: false,
     },
 
     rating: {
-        type: Number,
-        default: 0
+      type: Number,
+      default: 0,
     },
 
     numReviews: {
-        type: Number,
-        default: 0
+      type: Number,
+      default: 0,
     },
 
     tags: [String],
     owner: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "User",
-        required: true
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
     },
 
     metaTitle: {
-        type: String
+      type: String,
     },
 
     metaDescription: {
-        type: String
+      type: String,
     },
 
     metaKeyword: {
-        type: String
+      type: String,
     },
 
     dimensions: {
-        length: Number,
-        width: Number,
-        height: Number
+      length: Number,
+      width: Number,
+      height: Number,
     },
     weight: Number,
-},
-    { timestamps: true }
+  },
+  { timestamps: true }
 );
-
 
 export const Product = mongoose.model("Product", productSchema);

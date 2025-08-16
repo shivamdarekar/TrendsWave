@@ -7,7 +7,7 @@ const OrderConfirmation = () => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const { checkout } = useSelector((state) => state.checkout);
-    
+
     useEffect(() => {
         // This effect runs once to process the order details passed from the checkout page.
         if (checkout && checkout._id) {
@@ -16,7 +16,7 @@ const OrderConfirmation = () => {
         } else {
             // If a user navigates here directly or refreshes, the state will be lost.
             // In that case, we cannot show a confirmation and should redirect them.
-            navigate("/my-orders",{replace:true});
+            navigate("/my-orders", { replace: true });
         }
     }, [checkout, dispatch, navigate]);
 
@@ -94,8 +94,8 @@ const OrderConfirmation = () => {
                                 {checkout.shippingAddress.address}
                             </p>
                             <p className="text-gray-600">
-                                {checkout.shippingAddress.city},{" "}
-                                {checkout.shippingAddress.country}
+                                {checkout.shippingAddress.district},{" "}
+                                {checkout.shippingAddress.state}
                             </p>
                         </div>
                     </div>

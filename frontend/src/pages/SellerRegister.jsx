@@ -2,19 +2,28 @@ import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { registerUser } from '../redux/slices/authSlice.js';
 import { useDispatch, useSelector } from 'react-redux';
+import GoogleSignInButton from '../Components/Common/GoogleSignInButton.jsx';
+import { mergeCart } from '../redux/slices/cartSlice.js';
 
 const SellerRegister = () => {
     const [passwordError, setPasswordError] = useState("");
     const [emailError, setEmailError] = useState("");
     const dispatch = useDispatch();
-    const { loading,user } = useSelector((state) => state.auth);
+    const { user, guestId, loading } = useSelector((state) => state.auth);
+    const { cart } = useSelector((state) => state.cart);
     const navigate = useNavigate();
 
     useEffect(() => {
         if (user) {
-            navigate("/",{replace:true});
+            if (cart?.products.length > 0 && guestId) {
+                dispatch(mergeCart({ guestId, user })).then(() => {
+                    navigate("/", { replace: true });
+                })
+            } else {
+                navigate("/", { replace: true });
+            }
         }
-    }, [navigate, user]);
+    }, [user, guestId, cart, navigate, dispatch]);
 
     const [formData, setFormData] = useState({
         name: "",
@@ -47,8 +56,7 @@ const SellerRegister = () => {
         setEmailError("");
 
         try {
-            await dispatch(registerUser({ name, email, password, role: "admin" })).unwrap();
-            navigate("/",{replace:true});
+            await dispatch(registerUser({ name, email, password, role: import.meta.env.ROLE })).unwrap();
         } catch (error) {
             console.error("Registration failed:", error);
 
@@ -137,9 +145,24 @@ const SellerRegister = () => {
                     {loading ? "Loading..." : "Register as Seller"}
                 </button>
 
+                {/* --- "Or continue with" Divider --- */}
+                <div className="relative my-3">
+                    <div className="absolute inset-0 flex items-center">
+                        <div className="w-full border-t border-gray-300"></div>
+                    </div>
+                    <div className="relative flex justify-center text-sm">
+                        <span className="bg-white px-2 text-gray-500">Or continue with</span>
+                    </div>
+                </div>
+
+                {/* --- Google Sign-In Button --- */}
+                <div className="flex justify-center ">
+                    <GoogleSignInButton role="admin" />
+                </div>
+
                 <p className="mt-6 text-center text-sm">
                     Already registered?{" "}
-                    <Link to="/login" className="text-blue-500">Login</Link>
+                    <Link to="/login" className="text-blue-600 font-semibold">Login</Link>
                 </p>
             </form>
         </div>

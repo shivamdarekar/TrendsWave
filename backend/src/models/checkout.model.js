@@ -54,7 +54,8 @@ const checkoutSchema = new mongoose.Schema({
 
     shippingAddress: {
         address: { type: String, requires: true },
-        city: { type: String, requires: true },
+        state: { type: String, requires: true },
+        district: { type: String, requires: true },
         postalCode: { type: String, requires: true },
         country: { type: String, requires: true },
     },

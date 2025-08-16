@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { createProduct } from "../../redux/slices/adminProductSlice";
-import { uploadImage } from "../../redux/slices/uploadSlice";
 import { toast } from "sonner";
-import { resetUpload } from "../../redux/slices/uploadSlice";
+import { addUploadImage, resetUpload } from "../../redux/slices/uploadSlice";
+import { XMarkIcon } from "@heroicons/react/24/solid";
+
 
 const AddProduct = () => {
 
@@ -39,17 +40,23 @@ const AddProduct = () => {
     const file = e.target.files[0];
     if (!file) return;
 
+    if (productData.images.length >= 4) {
+    toast.error("You can upload a maximum of 4 images per product.", { duration: 2000 });
+    return;
+  }
+
     try {
-      const result = await dispatch(uploadImage(file)).unwrap();
+      const result = await dispatch(addUploadImage(file)).unwrap();
       setProductData((prevData) => ({
         ...prevData,
-        images: [...prevData.images, { url: result, altText: "" }],
+        images: [...prevData.images, result],
       }));
       dispatch(resetUpload());
-    } catch (err) {
-      toast.error(err || "Image upload failed", { duration: 1000 });
+    } catch {
+      toast.error("Image upload failed", { duration: 1000 });
     }
   };
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -79,7 +86,7 @@ const AddProduct = () => {
       //can we directly use initial state which is empty from slice
 
     } catch {
-      toast.error("Failed to add a Product.", {duration:1000});
+      toast.error("Failed to add a Product.", { duration: 1000 });
     }
   }
 
@@ -135,7 +142,7 @@ const AddProduct = () => {
           <input
             type="number"
             name="discountPrice"
-            value={productData.discountPrice}
+            value={productData.discountPrice || ""}
             onChange={handleChange}
             className="w-full border border-gray-300 rounded-md p-2"
           />
@@ -189,6 +196,7 @@ const AddProduct = () => {
             value={productData.sku}
             onChange={handleChange}
             className="w-full border border-gray-300 rounded-md p-2"
+            required
           />
         </div>
 
@@ -233,6 +241,7 @@ const AddProduct = () => {
             value={productData.collections}
             onChange={handleChange}
             className="w-full border border-gray-300 rounded-md p-2"
+            required
           />
         </div>
 
@@ -245,6 +254,7 @@ const AddProduct = () => {
             value={productData.material}
             onChange={handleChange}
             className="w-full border border-gray-300 rounded-md p-2"
+            required
           />
         </div>
 
@@ -267,6 +277,8 @@ const AddProduct = () => {
           <input
             type="file"
             onChange={handleImageUpload}
+            disabled={productData.images.length >= 4}
+            required
           />
           {uploading && <p>Uploading Image...</p>}
           <div className="flex gap-4 mt-4">

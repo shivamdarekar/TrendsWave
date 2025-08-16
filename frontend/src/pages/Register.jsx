@@ -5,6 +5,7 @@ import { registerUser } from '../redux/slices/authSlice.js';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { mergeCart } from '../redux/slices/cartSlice.js';
+import GoogleSignInButton from '../Components/Common/GoogleSignInButton.jsx';
 
 const Register = () => {
     const [name, setName] = useState("");
@@ -30,7 +31,7 @@ const Register = () => {
                     navigate(isCheckoutRedirect ? "/checkout" : "/",{replace:true});
                 });
             } else {
-                navigate(isCheckoutRedirect ? "/checkout" : "/",{replace:true});
+                navigate( "/",{replace:true});
             }
         }
     }, [user, guestId, cart, navigate, isCheckoutRedirect, dispatch]);
@@ -62,7 +63,7 @@ const Register = () => {
 
     return (
         <div className="flex">
-            <div className="w-full md:w-1/2 flex flex-col justify-center items-center p-8 md:p-12">
+            <div className="w-full md:w-1/2 flex flex-col justify-center items-center px-4 py-10">
                 <form
                     onSubmit={handleSubmit}
                     className="w-full max-w-md bg-white p-8 rounded-lg border shadow-lg" >
@@ -133,10 +134,25 @@ const Register = () => {
                         {loading ? "Loading..." : "Sign Up"}
                     </button>
 
+                     {/* --- "Or continue with" Divider --- */}
+                    <div className="relative my-3">
+                        <div className="absolute inset-0 flex items-center">
+                            <div className="w-full border-t border-gray-300"></div>
+                        </div>
+                        <div className="relative flex justify-center text-sm">
+                            <span className="bg-white px-2 text-gray-500">Or continue with</span>
+                        </div>
+                    </div>
+
+                    {/* --- Google Sign-In Button --- */}
+                    <div className="flex justify-center ">
+                        <GoogleSignInButton />
+                    </div>
+
                     <button
                         type="button"
                         onClick={() => navigate("/seller/register")}
-                        className="w-full mt-4 text-purple-600 font-semibold text-sm hover:underline"
+                        className="w-full mt-5 text-purple-700 font-semibold text-sm hover:underline"
                     >
                         Want to sell on TrendsWave? Become a Seller
                     </button>
@@ -146,7 +162,7 @@ const Register = () => {
                         Already registered? {""}
                         <Link
                             to={`/login?redirect=${encodeURIComponent(redirect)}`}
-                            className="text-blue-600"
+                            className="text-blue-700 font-semibold"
                         >
                             Login
                         </Link>

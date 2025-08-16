@@ -19,14 +19,35 @@ import OrderManagement from "./Components/Admin/OrderManagement.jsx"
 import AddProduct from "./Components/Admin/AddProduct.jsx"
 import NotFound from "./pages/NotFound.jsx"
 
-import { Provider } from "react-redux";
-import store from "./redux/store.js"
+import { Provider, useDispatch, useSelector } from "react-redux";
 import ProtectedRoute from "./Components/Common/ProtectedRoute.jsx"
 import SellerRegister from "./pages/SellerRegister.jsx"
+import { useEffect } from "react"
+import { fetchCurrentUser } from "./redux/slices/authSlice.js"
 
 function App() {
+
+  const dispatch = useDispatch();
+
+   const { authLoading } = useSelector((state) => state.auth);
+
+  // This will now work correctly because the Provider is in main.jsx
+  useEffect(() => {
+    dispatch(fetchCurrentUser());
+  }, [dispatch]);
+
+   // If the initial auth check is still running, show a loading indicator
+  if (authLoading) {
+    return (
+      <div className="flex justify-center items-center h-screen text-2xl">
+        <p>Loading...</p> {/* Or a fancy spinner component */}
+      </div>
+    );
+  }
+
+  
   return (
-    <Provider store={store}>
+    
       <BrowserRouter>
         <Toaster position="top-right" />
         <Routes>
@@ -65,7 +86,6 @@ function App() {
         </Routes>
       
       </BrowserRouter>
-    </Provider>
   )
 }
 export default App

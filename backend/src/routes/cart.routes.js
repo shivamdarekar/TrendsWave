@@ -68,10 +68,12 @@ router.post("/", async (req, res) => {
       }
 
       //recalculate total price
-      cart.totalPrice = cart.products.reduce(
-        (acc, item) => acc + ((item.discountPrice ?? item.price) * item.quantity),
-        0
-      ).toFixed(2);
+     cart.totalPrice = cart.products.reduce(
+  (acc, item) =>
+    acc + (((item.discountPrice ?? item.price) * (item.quantity || 1))),
+  0
+);
+
 
         //reduce() ek array method hai jo array ko ek single value me reduce karta hai. Jaise total sum, average, or merging.
         //accumalator mai hum total value store kr rahe hai
@@ -101,7 +103,7 @@ router.post("/", async (req, res) => {
             owner:product.owner
           },
         ],
-        totalPrice:((product.discountPrice ?? product.price) * quantity).toFixed(2), //only 1 item ka total nikalega
+totalPrice: ((product.discountPrice ?? product.price) * (quantity || 1)),
       });
       return res.status(201).json(newCart);
     }
@@ -135,10 +137,12 @@ router.put("/", async (req, res) => {
                 //Removes 1 item from the cart.products array at productIndex.
                 cart.products.splice(productIndex, 1); //remove product if quantity is 0
             }
+cart.totalPrice = cart.products.reduce(
+  (acc, item) =>
+    acc + (((item.discountPrice ?? item.price) * (item.quantity || 1))),
+  0
+);
 
-            cart.totalPrice = cart.products.reduce(
-                 (acc, item) => acc + ((item.discountPrice ?? item.price) * item.quantity), 0
-            ).toFixed(2)
 
             await cart.save();
             return res.status(200).json(cart);
@@ -172,9 +176,12 @@ router.delete("/", async (req, res) => {
         if (productIndex > -1) {
             cart.products.splice(productIndex, 1);
 
-            cart.totalPrice = cart.products.reduce(
-                 (acc, item) => acc + ((item.discountPrice ?? item.price) * item.quantity), 0
-            ).toFixed(2)
+          cart.totalPrice = cart.products.reduce(
+  (acc, item) =>
+    acc + (((item.discountPrice ?? item.price) * (item.quantity || 1))),
+  0
+);
+
 
             await cart.save();
             return res.status(200).json(cart);
@@ -259,7 +266,8 @@ router.post("/merge", protect, async (req, res) => {
         });
 
         userCart.totalPrice = userCart.products.reduce(
-          (acc, item) => acc + ((item.discountPrice ?? item.price) * item.quantity), 0
+          (acc, item) => acc +((item.discountPrice ?? item.price) * (item.quantity || 1)),
+   0
         );
 
         await userCart.save();

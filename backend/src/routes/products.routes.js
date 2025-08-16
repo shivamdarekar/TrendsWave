@@ -2,7 +2,7 @@ import express from "express";
 import { protect, admin } from "../middleware/authMiddleware.js";
 import { Product } from "../models/product.model.js";
 import { User } from "../models/user.model.js";
-import mongoose from "mongoose";
+import {deleteFromCloudinary} from "../utils/cloudinary.js"
 
 const router = express.Router();
 
@@ -11,7 +11,7 @@ const router = express.Router();
 
 router.post("/add", protect, admin, async (req, res) => {
   try {
-    const {
+    let {
       name,
       description,
       price,
@@ -34,6 +34,23 @@ router.post("/add", protect, admin, async (req, res) => {
     } = req.body.productData;
 
     // tell the backend to look for the product details inside the productData object.
+
+    if (!images || images.length < 1) {
+      return res
+        .status(400)
+        .json({ message: "At least one product image is required" });
+    }
+
+    if (images && images.length > 4) {
+      return res
+        .status(400)
+        .json({ message: "A product can have a maximum of 4 images." });
+    }
+
+    // normalize: if discount is 0 or empty → set to null
+    if (!discountPrice || discountPrice <= 0) {
+      discountPrice = null;
+    }
 
     const product = new Product({
       name,
@@ -60,6 +77,12 @@ router.post("/add", protect, admin, async (req, res) => {
 
     const createdProduct = await product.save();
 
+    // const publicIds = images.map((img) => img.publicId);
+    // await tempUpload.updateMany(
+    //   { publicId: { $in: publicIds }, user: req.user._id },
+    //   { isUsed: true }
+    // );
+
     return res.status(201).json(createdProduct);
   } catch (error) {
     console.error(error);
@@ -67,58 +90,9 @@ router.post("/add", protect, admin, async (req, res) => {
   }
 });
 
-//update an existing product using ID
-//access private/admin
-
-// router.put("/:id", protect, async (req, res) => {
-//     try {
-//          const {
-//             name, description, price, discountPrice, countInStock, category,
-//             brand, sizes, colors, collections, material, gender, images, isFeatured,
-//             isPublished, tags, dimensions, weight, sku
-//         } = req.body;
-
-//         //find product by ID
-//         const product = await Product.findById(req.params.id);
-
-//         if (product) {
-//             product.name = name || product.name;
-//             product.description = description || product.description;
-//             product.price = price || product.price;
-//             product.discountPrice = discountPrice || product.discountPrice;
-//             product.countInStock = countInStock || product.countInStock;
-//             product.category = category || product.category;
-//             product.brand = brand || product.brand;
-//             product.sizes = sizes || product.sizes;
-//             product.colors = colors || product.colors;
-//             product.collections = collections || product.collections;
-//             product.material = material || product.material;
-//             product.gender = gender || product.gender;
-//             product.images = images || product.images;
-//             product.isFeatured =
-//                 isFeatured !== undefined ? isFeatured: product.isFeatured;
-//             product.isPublished =
-//                 isPublished !==undefined ? isPublished: product.isPublished;
-//             product.tags = tags || product.tags;
-//             product.dimensions = dimensions || product.dimensions;
-//             product.weight = weight || product.weight;
-//             product.sku = sku || product.sku;
-
-//             //save updated Product
-//             const updatedProduct = await product.save();
-//             res.json(updatedProduct)
-//         } else {
-//             res.status(404).json({ message: "Product not found" });
-//         }
-//     } catch (error) {
-//         console.error(error);
-//         res.status(500).send("Something went wrong while updatig the product")
-//     }
-// })
-
 
 // PUT update product (seller can update own, admin can update any)
-router.put("/:id", protect,admin, async (req, res) => {
+router.put("/:id", protect, admin, async (req, res) => {
   try {
     const product = await Product.findById(req.params.id);
 
@@ -134,6 +108,25 @@ router.put("/:id", protect,admin, async (req, res) => {
         .json({ message: "Not authorized to update this product" });
     }
 
+    if (!product.images || product.images.length < 1) {
+      return res
+        .status(400)
+        .json({ message: "At least one product image is required" });
+    }
+
+    if (product.images && product.images.length > 4) {
+      return res
+        .status(400)
+        .json({ message: "A product can have a maximum of 4 images." });
+    }
+
+    let { discountPrice } = req.body;
+
+    // normalize: if discount is 0 or empty → set to null
+    if (!discountPrice || discountPrice <= 0) {
+      discountPrice = null;
+    }
+
     // Whitelist allowed fields to update
     const allowedUpdates = [
       "name",
@@ -144,7 +137,7 @@ router.put("/:id", protect,admin, async (req, res) => {
       "countInStock",
       "sku",
       "sizes",
-      "colors"
+      "colors",
     ];
     const updates = {};
     for (let key of allowedUpdates) {
@@ -153,11 +146,22 @@ router.put("/:id", protect,admin, async (req, res) => {
       }
     }
 
+    // overwrite normalized discountPrice into updates
+    if ("discountPrice" in updates) {
+      updates.discountPrice = discountPrice;
+    }
+
     const updatedProduct = await Product.findByIdAndUpdate(
       req.params.id,
       { $set: updates },
       { new: true, runValidators: true }
     );
+
+    // const publicIds = images.map((img) => img.publicId);
+    // await tempUpload.updateMany(
+    //   { publicId: { $in: publicIds }, user: req.user._id },
+    //   { isUsed: true }
+    // );
 
     res.json(updatedProduct);
   } catch (error) {
@@ -168,12 +172,15 @@ router.put("/:id", protect,admin, async (req, res) => {
   }
 });
 
-
 //delete product
 router.delete("/:id", protect, admin, async (req, res) => {
   try {
     //find product by ID
     const product = await Product.findById(req.params.id);
+
+    if (!product) {
+      return res.status(404).json({ message: "Product not found" });
+    }
 
     const isOwner = product.owner.toString() === req.user._id.toString();
 
@@ -183,13 +190,24 @@ router.delete("/:id", protect, admin, async (req, res) => {
         .json({ message: "Not authorized to delete this product" });
     }
 
-    if (product) {
+    //  Delete images from Cloudinary before removing product
+    if (product.images && product.images.length > 0) {
+      for (const img of product.images) {
+        try {
+          // We already store publicId, so use that directly
+          if (img.publicId) {
+            await deleteFromCloudinary(img.publicId);
+          }
+        } catch (cloudErr) {
+          console.error(`Failed to delete image ${img.url} from Cloudinary`, cloudErr);
+        }
+      }
+    }
+
       //remove it from database
       await product.deleteOne();
       return res.status(200).json({ message: "Product removed successfully" });
-    } else {
-      return res.status(404).json({ message: "Product not found" });
-    }
+        
   } catch (error) {
     console.error(error);
     return res
@@ -330,11 +348,10 @@ router.get("/new-arrivals", async (req, res) => {
 
 //get a product by ID
 router.get("/:id", async (req, res) => {
-
   try {
     const product = await Product.findById(req.params.id);
     if (!product) {
-      return res.status(404).json({message:"product not found"})
+      return res.status(404).json({ message: "product not found" });
     }
     return res.json(product);
   } catch (error) {
@@ -367,18 +384,18 @@ router.get("/similar/:id", async (req, res) => {
   }
 });
 
-
 //get product details for edit product
-router.get("/:id/edit",protect,admin, async (req, res) => {
-
+router.get("/:id/edit", protect, admin, async (req, res) => {
   try {
     const product = await Product.findById(req.params.id);
     if (!product) {
-      return res.status(404).json({message:"product not found"})
+      return res.status(404).json({ message: "product not found" });
     }
 
     if (product.owner.toString() !== req.user._id.toString()) {
-      return res.status(403).json({ message: "Not authorized to edit this product" });
+      return res
+        .status(403)
+        .json({ message: "Not authorized to edit this product" });
     }
 
     return res.json(product);
@@ -387,6 +404,5 @@ router.get("/:id/edit",protect,admin, async (req, res) => {
     return res.status(500).send("Server error");
   }
 });
-
 
 export default router;

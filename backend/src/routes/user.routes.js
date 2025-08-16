@@ -2,25 +2,11 @@ import express from "express";
 import { User } from "../models/user.model.js";
 import jwt from "jsonwebtoken";
 import { protect } from "../middleware/authMiddleware.js";
+import generateAccessAndRefreshToken from "../utils/tokens.js";
 
 const router = express.Router();
 
-const generateAccessAndRefreshToken = async (userId) => {
-  try {
-    const user = await User.findById(userId);
-
-    const accessToken = user.generateAccessToken();
-    const refreshToken = user.generateRefreshToken();
-
-    user.refreshToken = refreshToken; //store refresh token in database
-    await user.save({ validateBeforeSave: false });
-    return { accessToken, refreshToken };
-  } catch (error) {
-    //res.status(500).json({message: "Something went wrong while generating Access and Refresh Token",});
-    console.error("error", error);
-  }
-};
-
+//register route
 router.post("/register", async (req, res) => {
   const { name, email, password, role } = req.body;
 
@@ -40,9 +26,9 @@ router.post("/register", async (req, res) => {
     const user = new User({ name, email, password, role: userRole });
     await user.save();
 
-     const { accessToken, refreshToken } = await generateAccessAndRefreshToken(
+    const { accessToken, refreshToken } = await generateAccessAndRefreshToken(
       user._id
-     );
+    );
 
     const createdUser = await User.findById(user._id).select(
       "-password -refreshToken"
@@ -58,18 +44,16 @@ router.post("/register", async (req, res) => {
       secure: process.env.NODE_ENV == "production", //cookies share only on https true in production
     };
 
-    return (
-      res
-        .status(200)
-        .cookie("accessToken", accessToken, options)
-        .cookie("refreshToken", refreshToken, options)
-        .json({
-          user: createdUser,
-          refreshToken,
-          accessToken,
-          message: "User registered successfully",
-        })
-    );
+    return res
+      .status(200)
+      .cookie("accessToken", accessToken, options)
+      .cookie("refreshToken", refreshToken, options)
+      .json({
+        user: createdUser,
+        refreshToken,
+        accessToken,
+        message: "User registered successfully",
+      });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Error while registering a user" });
@@ -201,7 +185,6 @@ router.post("/logout", protect, async (req, res) => {
     .clearCookie("refreshToken", options)
     .json({ message: "User logged out successfully" });
 });
-
 
 router.get("/profile", protect, async (req, res) => {
   return res.json(req.user);
