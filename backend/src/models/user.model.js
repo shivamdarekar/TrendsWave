@@ -22,17 +22,23 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true,
       minLength: 6,
+      validate: {
+        validator: function (value) {
+          return /[!@#$%^&*(),.?":{}|<>]/.test(value);
+        },
+        message: "Password must contain at least one special character",
+      },
     },
+    //validate option lets you add custom validation rules.
+    //test() is js regex method, it checks whether the regex pattern exists in the given string (value).
 
     role: {
       type: String,
       enum: ["customer", "admin"],
       default: "customer",
     },
-    
-    refreshToken: {
-        
-    },
+
+    refreshToken: {},
 
     googleId: {
       type: String,

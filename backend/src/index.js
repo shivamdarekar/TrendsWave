@@ -7,6 +7,7 @@ import connectdb from "./config/DB.js";
 import cookieParser from "cookie-parser";
 import passport from "./config/passport.js";
 import session from "express-session";
+import { applySecurity } from "./security.js";
 
 //cors => It is a security feature built into browsers that controls how websites from different domains can talk to each other.
 //agar hamara frontend alag port pe hai & backend alag port pe to wo frontend api access karne ke liye cors use karte hai
@@ -41,6 +42,7 @@ const port = process.env.PORT || 3000;
 
 //connect to DB
 connectdb();
+
 //import "./utils/cleanUp.js"
 
 app.get("/", (req, res) => {
@@ -58,7 +60,7 @@ import subscribeRoutes from "./routes/subscribe.routes.js";
 import productAdminRoutes from "./routes/adminProductsRoutes.js";
 import orderAdminRoutes from "./routes/adminOrderRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
-import { applySecurity } from "./security.js";
+import razorpayRoutes from "./routes/razorpay.routes.js"
 
 //setup routes
 app.use("/api/users", userRoutes);
@@ -71,6 +73,7 @@ app.use("/api", subscribeRoutes);
 app.use("/api/admin/products", productAdminRoutes);
 app.use("/api/admin/orders", orderAdminRoutes);
 app.use("/api/auth", authRoutes);
+app.use("/api/razorpay", razorpayRoutes);
 
 app.listen(port, () => {
   console.log(`server is running on http://localhost:${port}`);

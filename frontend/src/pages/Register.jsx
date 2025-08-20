@@ -11,12 +11,13 @@ const Register = () => {
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
-
     const [emailError, setEmailError] = useState("");
     const [passwordError, setPasswordError] = useState("");
+
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const location = useLocation();  //Ye hook current URL ke baare me info deta hai, including search parameters, pathname etc.
+    
     const { user, guestId, loading } = useSelector((state) => state.auth);
     const { cart } = useSelector((state) => state.cart);
 
@@ -28,10 +29,10 @@ const Register = () => {
         if (user) {
             if (cart?.products.length > 0 && guestId) {
                 dispatch(mergeCart({ guestId, user })).then(() => {
-                    navigate(isCheckoutRedirect ? "/checkout" : "/",{replace:true});
+                    navigate(isCheckoutRedirect ? "/checkout" : "/", { replace: true });
                 });
             } else {
-                navigate( "/",{replace:true});
+                navigate("/", { replace: true });
             }
         }
     }, [user, guestId, cart, navigate, isCheckoutRedirect, dispatch]);
@@ -42,8 +43,15 @@ const Register = () => {
         if (password.length < 6) {
             setPasswordError("Password must be at least 6 characters.");
             return;
-        } 
-        
+        }
+
+        // Special character check
+        const specialCharRegex = /[!@#$%^&*(),.?":{}|<>]/;
+        if (!specialCharRegex.test(password)) {
+            setPasswordError("Password must contain at least one special character.");
+            return;
+        }
+
         setPasswordError("");
         setEmailError("");
 
@@ -106,8 +114,8 @@ const Register = () => {
                             required
                         />
                         {emailError && (
-                        <p className="text-red-500 text-sm mt-2">{emailError}</p>
-                    )}
+                            <p className="text-red-500 text-sm mt-2">{emailError}</p>
+                        )}
                     </div>
 
                     <div className="mb-4">
@@ -134,7 +142,7 @@ const Register = () => {
                         {loading ? "Loading..." : "Sign Up"}
                     </button>
 
-                     {/* --- "Or continue with" Divider --- */}
+                    {/* --- "Or continue with" Divider --- */}
                     <div className="relative my-3">
                         <div className="absolute inset-0 flex items-center">
                             <div className="w-full border-t border-gray-300"></div>
@@ -175,7 +183,7 @@ const Register = () => {
                     <img
                         src={register}
                         alt="Login to Account"
-                        className="h-[700px] w-full object-cover"
+                        className="h-[750px] w-full object-cover"
                     />
                 </div>
             </div>

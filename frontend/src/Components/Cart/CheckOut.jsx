@@ -1,14 +1,27 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import PaypalButton from "./PaypalButton.jsx";
 import { useDispatch, useSelector } from "react-redux";
 import { createCheckout } from "../../redux/slices/checkoutSlice.js";
 import axios from "axios";
 import { getAllStates, getDistricts } from "india-state-district";
 
+// helper to load Razorpay script once
+const loadRazorpayScript = () =>
+    new Promise((resolve) => {
+        const src = "https://checkout.razorpay.com/v1/checkout.js";
+        if (document.querySelector(`script[src="${src}"]`)) return resolve(true);
+        const script = document.createElement("script");
+        script.src = src;
+        script.onload = () => resolve(true);
+        script.onerror = () => resolve(false);
+        document.body.appendChild(script);
+    });
+
 const Checkout = () => {
     const navigate = useNavigate();
     const [checkoutId, setCheckoutId] = useState(null);
+    const [rzpOrder, setRzpOrder] = useState(null);
+    const [processing, setProcessing] = useState(false);
 
     const dispatch = useDispatch();
     const { cart, loading, error } = useSelector((state) => state.cart);
@@ -58,54 +71,120 @@ const Checkout = () => {
 
     const handleCreateCheckout = async (e) => {
         e.preventDefault();
-        if (cart && cart.products.length > 0) {
-            const res = await dispatch(
-                createCheckout({
-                    checkoutItems: cart.products,
-                    shippingAddress,
-                    paymentMethod: "Paypal",
-                    totalPrice: cart.totalPrice,
-                })
-            );
-            if (res.payload && res.payload._id) {
-                setCheckoutId(res.payload._id);
-            }
-        }
-    };
-
-    const handlePaymentSuccess = async (details) => {
+        setProcessing(true);
         try {
-            const response = await axios.put(
-                `${import.meta.env.VITE_BACKEND_URL}/api/checkout/${checkoutId}/pay`,
-                { paymentStatus: "paid", paymentDetails: details }
-            );
-            if (response.status === 200) {
-                await handleFinalizeCheckout(checkoutId);
-            } else {
-                alert("Payment update failed. Please try again.");
+            if (cart && cart.products.length > 0) {
+                const res = await dispatch(
+                    createCheckout({
+                        checkoutItems: cart.products,
+                        shippingAddress,
+                        paymentMethod: "Razorpay",
+                        totalPrice: cart.totalPrice,
+                    })
+                );
+                if (res.payload && res.payload._id) {
+                    setCheckoutId(res.payload._id);
+
+                    const { data } = await axios.post(
+                        `${import.meta.env.VITE_BACKEND_URL}/api/razorpay/order`,
+                        { checkoutId: res.payload._id },
+                        { withCredentials: true }
+                    );
+                    setRzpOrder(data);
+                }
             }
         } catch (error) {
             console.error(error);
-            alert("Payment update failed. Please try again.");
+            alert("Something went wrong. Please try again.");
+        } finally {
+            setProcessing(false); // re-enable
         }
     };
 
-    const handleFinalizeCheckout = async (checkoutId) => {
-        try {
-            const response = await axios.post(
-                `${import.meta.env.VITE_BACKEND_URL}/api/checkout/${checkoutId}/finalize`,
-                {}
-            );
-            if (response.status === 201) {
-                navigate("/order-confirmation");
-            } else {
-                alert("There was an issue confirming your order.");
-            }
-        } catch (error) {
-            console.error(error);
-            alert("There was an issue confirming your order.");
+    const handlePayWithRazorpay = async () => {
+        setProcessing(true);
+        const ok = await loadRazorpayScript();
+        if (!ok) {
+            alert("Failed to load Razorpay. Check your network.");
+            setProcessing(false);
+            return;
         }
+        if (!rzpOrder) {
+            alert("Payment order not ready. Please try again.");
+            setProcessing(false);
+            return;
+        }
+
+        const options = {
+            key: rzpOrder.keyId,
+            amount: rzpOrder.amount,      // in paise
+            currency: rzpOrder.currency,  // "INR"
+            name: "TrendsWave",
+            description: "Order payment",
+            order_id: rzpOrder.orderId,
+            prefill: {
+                name: `${shippingAddress.firstName} ${shippingAddress.lastName}`,
+                email: user?.email || "",
+                contact: shippingAddress.phone || "",
+            },
+            notes: { checkoutId },
+            theme: { color: "#000000" },
+
+            handler: async function (response) {
+                // Verify on backend
+                try {
+                    const verifyRes = await axios.post(
+                        `${import.meta.env.VITE_BACKEND_URL}/api/razorpay/verify`,
+                        {
+                            checkoutId,
+                            razorpay_order_id: response.razorpay_order_id,
+                            razorpay_payment_id: response.razorpay_payment_id,
+                            razorpay_signature: response.razorpay_signature,
+                        },
+                        { withCredentials: true }
+                    );
+
+                    //Finalize -> creates Order in your DB
+                    if (verifyRes.data.success) {
+                        const finalizeRes = await axios.post(
+                            `${import.meta.env.VITE_BACKEND_URL}/api/checkout/${checkoutId}/finalize`,
+                            {},
+                            { withCredentials: true }
+                        );
+
+                        if (finalizeRes.status === 201) {
+                            // pass orderId to confirmation page; it will fetch fresh data by ID
+                            navigate("/order-confirmation", {
+                                replace: true,
+                                state: { orderId: finalizeRes.data.order._id },
+                            });
+                        } else {
+                            alert("There was an issue confirming your order.");
+                        }
+                    } else {
+                        alert("Payment verification failed. Please contact support.");
+                    }
+                } catch (err) {
+                    console.error(err);
+                    alert("Payment verification failed.");
+                } finally {
+                    setProcessing(false);
+                }
+            },
+
+            modal: {
+                ondismiss: function () {
+                    // User closed popup
+                    console.log("Payment popup closed");
+                    setProcessing(false);
+                },
+            },
+        };
+
+        const rzp = new window.Razorpay(options);
+        rzp.open();
     };
+
 
     if (loading) return <p>Loading Cart...</p>;
     if (error) return <p>Error: {error}</p>;
@@ -272,20 +351,39 @@ const Checkout = () => {
                         {!checkoutId ? (
                             <button
                                 type="submit"
-                                className="w-full bg-black text-white py-3 rounded"
+                                className="w-full bg-black text-white py-3 rounded flex items-center justify-center disabled:opacity-50"
+                                disabled={processing}
                             >
-                                Continue to Payment
+                                {processing ? (
+                                    <div className="flex items-center gap-2">
+                                        <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                                        <span>Processing...</span>
+                                    </div>
+                                ) : (
+                                    "Continue to Payment"
+                                )}
                             </button>
                         ) : (
                             <div>
-                                <h3 className="text-lg mb-4">Pay with Paypal</h3>
-                                <PaypalButton
-                                    amount={cart.totalPrice}
-                                    onSuccess={handlePaymentSuccess}
-                                    onError={() => alert("Payment failed. Try again.")}
-                                />
+                                <h3 className="text-lg mb-4">Pay with Razorpay</h3>
+                                <button
+                                    type="button"
+                                    onClick={handlePayWithRazorpay}
+                                    className="w-full bg-black text-white py-3 rounded flex items-center justify-center disabled:opacity-50"
+                                    disabled={processing}
+                                >
+                                    {processing ? (
+                                        <div className="flex items-center gap-2">
+                                            <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                                            <span>Processing Payment...</span>
+                                        </div>
+                                    ) : (
+                                        "Pay Now"
+                                    )}
+                                </button>
                             </div>
                         )}
+
                     </div>
                 </form>
             </div>

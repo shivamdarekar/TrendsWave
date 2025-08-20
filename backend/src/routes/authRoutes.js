@@ -14,7 +14,7 @@ router.get("/google", (req, res, next) => {
   };
 
   passport.authenticate("google", {
-    scope: ["profile", "email"],
+    scope: ["profile", "email"], //tells Google what info you want.
   })(req, res, next);
 });
 

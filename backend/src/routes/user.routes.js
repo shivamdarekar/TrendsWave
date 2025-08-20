@@ -19,6 +19,14 @@ router.post("/register", async (req, res) => {
     return res.status(409).json({ message: "User is already exist" });
   }
 
+  // regex check: at least one special character
+    const specialCharRegex = /[!@#$%^&*(),.?":{}|<>]/;
+    if (!specialCharRegex.test(password)) {
+      return res.status(400).json({
+        message: "Password must contain at least one special character",
+      });
+    }
+
   // allow role only for trusted registration
   const userRole = ["admin", "customer"].includes(role) ? role : "customer";
 

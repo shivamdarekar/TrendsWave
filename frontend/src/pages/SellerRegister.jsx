@@ -8,9 +8,11 @@ import { mergeCart } from '../redux/slices/cartSlice.js';
 const SellerRegister = () => {
     const [passwordError, setPasswordError] = useState("");
     const [emailError, setEmailError] = useState("");
-    const dispatch = useDispatch();
+
     const { user, guestId, loading } = useSelector((state) => state.auth);
     const { cart } = useSelector((state) => state.cart);
+
+    const dispatch = useDispatch();
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -49,6 +51,13 @@ const SellerRegister = () => {
         // Validate password length
         if (password.length < 6) {
             setPasswordError("Password must be at least 6 characters.");
+            return;
+        }
+
+         // Special character check
+        const specialCharRegex = /[!@#$%^&*(),.?":{}|<>]/;
+        if (!specialCharRegex.test(password)) {
+            setPasswordError("Password must contain at least one special character.");
             return;
         }
 
