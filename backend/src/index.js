@@ -18,6 +18,9 @@ const app = express();
 app.use(cookieParser());
 app.use(express.json());
 
+// trust proxy for correct IP
+app.set("trust proxy", 1);
+
 // CORS setup (only allow frontend origin)
 app.use( cors({
     origin: process.env.FRONTEND_URL,

@@ -42,6 +42,7 @@ router.get("/google/callback", (req, res, next) => {
       const options = {
         httpOnly: true,
         secure: process.env.NODE_ENV == "production",
+        sameSite: process.env.NODE_ENV === "production" ? "None" : "lax",
       };
 
       res

@@ -48,6 +48,7 @@ router.post("/register", async (req, res) => {
     const options = {
       httpOnly: true,
       secure: process.env.NODE_ENV == "production", //cookies share only on https true in production
+      sameSite: process.env.NODE_ENV === "production" ? "None" : "lax",
     };
 
     return res
@@ -109,6 +110,8 @@ router.post("/seller/register", async (req, res) => {
     const options = {
       httpOnly: true,
       secure: process.env.NODE_ENV == "production", //cookies share only on https true in production
+      sameSite: process.env.NODE_ENV === "production" ? "None" : "lax",
+      
     };
 
     return res
@@ -156,7 +159,7 @@ router.post("/login", async (req, res) => {
     const options = {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      //sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      sameSite: process.env.NODE_ENV === "production" ? "None" : "lax",
     };
 
     /*
@@ -210,6 +213,7 @@ router.post("/refreh-token", async (req, res) => {
     const options = {
       httpOnly: true,
       secure: process.env.NODE_ENV == "production",
+      sameSite: process.env.NODE_ENV === "production" ? "None" : "lax",
     };
 
     const { accessToken, refreshToken: newRefreshToken } =
@@ -245,6 +249,7 @@ router.post("/logout", protect, async (req, res) => {
   const options = {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
+    sameSite: process.env.NODE_ENV === "production" ? "None" : "lax",
   };
 
   return res
