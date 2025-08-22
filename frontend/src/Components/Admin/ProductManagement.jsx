@@ -13,7 +13,7 @@ const ProductManagement = () => {
     const { user } = useSelector((state) => state.auth);
 
     useEffect(() => {
-        if (user?.role == "admin") {
+        if (user?.role === "admin") {
             dispatch(fetchAdminProducts());
         } else {
             navigate("/")
@@ -21,6 +21,7 @@ const ProductManagement = () => {
     }, [dispatch, user, navigate]);
 
     const handleDelete = async (id) => {
+        // Replace window.confirm with a custom modal in a real app
         if (window.confirm("Are you sure you want to delete the Product")) {
             try {
                 await dispatch(deleteProduct(id)).unwrap();
@@ -39,8 +40,9 @@ const ProductManagement = () => {
     if (error) return <p className='text-center'>Error: {error}</p>
 
     return (
-        <div className="max-w-7xl mx-auto p-6">
+        <div className="max-w-7xl mx-auto p-4 sm:p-6">
             <h2 className="text-2xl font-bold mb-6 ">Product Management</h2>
+            {/* --- MODIFIED THIS LINE --- */}
             <div className="overflow-x-auto shadow-md sm:rounded-lg">
                 <table className="min-w-full text-left text-gray-600">
                     <thead className="bg-gray-100 text-xs uppercase text-gray-700">
@@ -57,15 +59,15 @@ const ProductManagement = () => {
                             products.map((product) => (
                                 <tr
                                     key={product._id}
-                                    className="border-b hover:bg-gray-50 cursor-pointer"
+                                    className="border-b hover:bg-gray-50"
                                 >
-                                    <td className="p-4 font-medium text-gray-900 whitespace-nowrap hover:underline"
+                                    <td className="p-4 font-medium text-gray-900 whitespace-nowrap hover:underline cursor-pointer"
                                         onClick={() => handleRowClick(product._id)}>
                                         {product.name}
                                     </td>
-                                    <td className="p-4">₹{(product.discountPrice ? product.discountPrice : product.price).toFixed(2)}</td>
-                                    <td className="p-4">{product.sku}</td>
-                                    <td className="p-4">
+                                    <td className="p-4 whitespace-nowrap">₹{(product.discountPrice ? product.discountPrice : product.price).toFixed(2)}</td>
+                                    <td className="p-4 whitespace-nowrap">{product.sku}</td>
+                                    <td className="p-4 whitespace-nowrap">
                                         <Link
                                             to={`/admin/products/${product._id}/edit`}
                                             className="bg-yellow-500 text-white px-2 py-1 rounded mr-2 hover:bg-yellow-600"
@@ -73,7 +75,10 @@ const ProductManagement = () => {
                                             Edit
                                         </Link>
                                         <button
-                                            onClick={() => handleDelete(product._id)}
+                                            onClick={(e) => {
+                                                e.stopPropagation(); // Prevent row click from firing
+                                                handleDelete(product._id);
+                                            }}
                                             className="bg-red-500 px-2 py-1 rounded hover:bg-red-600 text-white"
                                         >
                                             Delete
@@ -95,4 +100,4 @@ const ProductManagement = () => {
     )
 }
 
-export default ProductManagement
+export default ProductManagement;

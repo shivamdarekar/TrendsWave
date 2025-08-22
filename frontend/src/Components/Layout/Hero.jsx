@@ -8,7 +8,7 @@ const Hero = () => {
             <img
                 src={heroImg}
                 alt="TrendsWave"
-                className="w-full h-[350px] md:h-[450px] lg:h-[600px] md:object-cover "
+                className="w-full h-[400px] md:h-[500px] lg:h-[600px] object-cover"
             />
 
             {/* Hero Content */}
@@ -21,7 +21,7 @@ const Hero = () => {
                         Explore our vacation-ready outfits with fast worldwide shipping.
                     </p>
                     <Link to="/collections/all" className="bg-gradient-to-r from-amber-400 to-yellow-500
-                     text-gray-900 px-6  sm:px-10 py-3 sm:py-4 rounded-full text-lg font-bold hover:from-amber-300
+                     text-gray-900 px-6 sm:px-10 py-3 sm:py-4 rounded-full text-lg font-bold hover:from-amber-300
                       hover:to-yellow-400 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 ">
                         Shop Now
                     </Link>
