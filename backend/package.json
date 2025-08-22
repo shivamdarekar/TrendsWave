@@ -7,8 +7,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node src/index.js",
-    "dev": "nodemon -r dotenv/config src/index.js",
-    "seed": "node src/seeder.js"
+    "dev": "nodemon -r dotenv/config src/index.js"
   },
   "author": "Shivam Darekar",
   "license": "ISC",

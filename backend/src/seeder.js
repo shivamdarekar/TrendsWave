@@ -7,6 +7,8 @@ import { Cart } from "./models/cart.model.js";
 import { Checkout } from "./models/checkout.model.js";
 import { Order } from "./models/order.model.js";
 
+//"seed": "node src/seeder.js"
+
 dotenv.config();
 
 //connect to database
