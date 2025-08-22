@@ -31,7 +31,8 @@ const Navbar = () => {
 
     return (
         <>
-            <nav className="container mx-auto flex items-center justify-between py-4 px-6">
+            {/* The `gap-4` class was added here to ensure spacing on mobile */}
+            <nav className="container mx-auto flex items-center justify-between gap-4 py-4 px-6">
 
                 {/* left-logo */}
                 <div>
@@ -70,7 +71,6 @@ const Navbar = () => {
                 </div>
 
                 {/* Right-icons */}
-
                 <div className='flex items-center  gap-3 sm:gap-4'>
                     {user && user.role === "admin" && (
                         <Link to="/admin" className="block bg-black px-2 rounded text-sm text-white ">
@@ -107,7 +107,7 @@ const Navbar = () => {
 
             {/* Mobile Navigation */}
             <div className={`fixed top-0 left-0 w-3/4 sm:w-1/2 md:w-1/3 h-full bg-white shadow-lg transform
-                     transition-transform duration-300 z-50 ${navDrawerOpen ? "translate-x-0" : "-translate-x-full"
+                         transition-transform duration-300 z-50 ${navDrawerOpen ? "translate-x-0" : "-translate-x-full"
                 }`}
             >
                 <div className="flex justify-end p-4">
@@ -157,6 +157,5 @@ const Navbar = () => {
         </>
     )
 }
-
 
 export default Navbar;

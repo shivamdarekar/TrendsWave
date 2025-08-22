@@ -38,8 +38,8 @@ const OrderConfirmation = () => {
             </h1>
 
             <div className="p-6 rounded-lg border">
-                <div className="flex justify-between mb-20">
-                    <div>
+                <div className="flex flex-col md:flex-row md:justify-between mb-20">
+                    <div className="mb-2 md:mb-0">
                         <h2 className="text-xl font-semibold">Order ID: {orderDetails._id}</h2>
                         <p className="text-gray-500">
                             Order date: {new Date(orderDetails.createdAt).toLocaleDateString()}
@@ -62,7 +62,7 @@ const OrderConfirmation = () => {
                             </div>
                             <div className="ml-auto text-right">
                                 <p>₹{(item.price * item.quantity).toFixed(2)}</p>
-                                <p className="text-sm text-gray-600">Quantity: {item.quantity}</p>
+                                <p className="text-sm text-gray-600 whitespace-nowrap">Quantity: {item.quantity}</p>
                             </div>
                         </div>
                     ))}
