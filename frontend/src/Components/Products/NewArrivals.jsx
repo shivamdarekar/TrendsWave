@@ -103,7 +103,7 @@ const NewArrivals = () => {
             <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-40 text-white p-4 ">
               <Link to={`/product/${product._id}`} className="block">
                 <h4 className="font-semibold ">{product.name}</h4>
-                <p className="mt-1 ">₹{(product.discountPrice ? product.discountPrice : product.price).toFixed(2)}</p>
+                <p className="mt-1 ">₹{(product.discountPrice ? product.discountPrice : product.price)}</p>
               </Link>
             </div>
           </div>

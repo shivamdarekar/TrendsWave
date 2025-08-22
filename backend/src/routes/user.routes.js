@@ -8,7 +8,7 @@ const router = express.Router();
 
 //register route
 router.post("/register", async (req, res) => {
-  const { name, email, password, role } = req.body;
+  const { name, email, password } = req.body;
 
   if ([name, email, password].some((field) => field?.trim() == "")) {
     return res.status(400).json({ message: "all fields are required" });
@@ -26,12 +26,10 @@ router.post("/register", async (req, res) => {
         message: "Password must contain at least one special character",
       });
     }
-
-  // allow role only for trusted registration
-  const userRole = ["admin", "customer"].includes(role) ? role : "customer";
+  
 
   try {
-    const user = new User({ name, email, password, role: userRole });
+    const user = new User({ name, email, password, role: "customer" });
     await user.save();
 
     const { accessToken, refreshToken } = await generateAccessAndRefreshToken(
@@ -67,6 +65,68 @@ router.post("/register", async (req, res) => {
     res.status(500).json({ message: "Error while registering a user" });
   }
 });
+
+
+//seller register
+router.post("/seller/register", async (req, res) => {
+  const { name, email, password } = req.body;
+
+  if ([name, email, password].some((field) => field?.trim() == "")) {
+    return res.status(400).json({ message: "all fields are required" });
+  }
+
+  const existedUser = await User.findOne({ email });
+  if (existedUser) {
+    return res.status(409).json({ message: "User is already exist" });
+  }
+
+  // regex check: at least one special character
+    const specialCharRegex = /[!@#$%^&*(),.?":{}|<>]/;
+    if (!specialCharRegex.test(password)) {
+      return res.status(400).json({
+        message: "Password must contain at least one special character",
+      });
+    }
+
+
+  try {
+    const user = new User({ name, email, password, role: "admin" });
+    await user.save();
+
+    const { accessToken, refreshToken } = await generateAccessAndRefreshToken(
+      user._id
+    );
+
+    const createdUser = await User.findById(user._id).select(
+      "-password -refreshToken"
+    );
+    if (!createdUser) {
+      return res
+        .status(500)
+        .json({ message: "Something went wrong while registering a user" });
+    }
+
+    const options = {
+      httpOnly: true,
+      secure: process.env.NODE_ENV == "production", //cookies share only on https true in production
+    };
+
+    return res
+      .status(200)
+      .cookie("accessToken", accessToken, options)
+      .cookie("refreshToken", refreshToken, options)
+      .json({
+        user: createdUser,
+        refreshToken,
+        accessToken,
+        message: "User registered successfully",
+      });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Error while registering a user" });
+  }
+});
+
 
 router.post("/login", async (req, res) => {
   const { email, password } = req.body;

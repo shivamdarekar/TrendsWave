@@ -54,7 +54,7 @@ const SellerRegister = () => {
             return;
         }
 
-         // Special character check
+        // Special character check
         const specialCharRegex = /[!@#$%^&*(),.?":{}|<>]/;
         if (!specialCharRegex.test(password)) {
             setPasswordError("Password must contain at least one special character.");
@@ -65,7 +65,11 @@ const SellerRegister = () => {
         setEmailError("");
 
         try {
-            await dispatch(registerUser({ name, email, password, role: import.meta.env.ROLE })).unwrap();
+            await dispatch(registerUser({
+                userData: { name, email, password },
+                endpoint: "/seller/register",
+            })
+            ).unwrap()
         } catch (error) {
             console.error("Registration failed:", error);
 

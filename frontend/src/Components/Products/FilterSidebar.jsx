@@ -37,7 +37,7 @@ const FilterSidebar = () => {
 
     const materials = [
         "Cotton", "Wool", "Denim", "Polyester",
-        "Silk", "Linen", "Viscose", "Fleece"
+        "Silk", "Linen", "Viscose", "Cotton Blend"
     ]
 
     const brands = [

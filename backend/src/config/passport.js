@@ -45,11 +45,12 @@ passport.use(
                         delete  req.session.oauth_flow_data?.role 
                     }
 
-                    const randomPassword = crypto.randomBytes(32).toString("hex");
+                    const randomPassword = crypto.randomBytes(32).toString("hex")
+                    const password = `${randomPassword}%`
                     user = await User.create({
                         name: profile.displayName || "Google User",
                         email: email || `user-${profile.id}@google.local`,
-                        password: randomPassword, //hashed by pre-save
+                        password: password, //hashed by pre-save
                         googleId: profile.id,
                         provider: "google",
                         avatar,

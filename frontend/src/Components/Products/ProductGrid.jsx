@@ -24,7 +24,7 @@ const ProductGrid = ({ products, loading, error }) => {
               <div className="absolute bottom-0 left-0 w-full bg-black bg-opacity-50 text-white p-2 sm:p-3 rounded-b-lg">
                 <h3 className="text-xs sm:text-sm font-semibold truncate">{product.name}</h3>
                 <p className="text-[10px] sm:text-xs font-medium">
-                  ₹ {(product.discountPrice ?? product.price).toFixed(2)}
+                  ₹ {(product.discountPrice ?? product.price)}
                 </p>
               </div>
             </div>

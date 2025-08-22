@@ -136,7 +136,7 @@ router.delete("/:productId", protect, admin, async (req, res) => {
     const product = await Product.findById(productId);
     if (!product) return res.status(404).json({ message: "Product not found" });
 
-    if (product.images.length <= 1) {
+    if (product.images.length < 1) {
       return res
         .status(400)
         .json({ message: "At least one product image is required" });

@@ -61,7 +61,7 @@ router.get("/google/callback", (req, res, next) => {
       res.redirect(`${process.env.FRONTEND_URL}${To}`);
       
     } catch (e) {
-      const fail = `${process.env.FRONTEND_URL}/login?error=server_error`;
+      const fail = `${process.env.FRONTEND_URL}/login`;
       return res.redirect(fail);
     }
   })(req, res, next);

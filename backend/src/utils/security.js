@@ -10,7 +10,7 @@ export const applySecurity = (app) => {
   //  Global API rate limiter (100 requests / 15min per IP)
   const apiLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 100, 
+    max: 150, 
     standardHeaders: true,
     legacyHeaders: false,
     message: "Too many requests from this IP, please try again later.",
@@ -23,5 +23,5 @@ export const applySecurity = (app) => {
     max: 8, // only 5 login attempts in 15 minutes
     message: "Too many login attempts, please try again later.",
   });
-  app.use("/api/auth", authLimiter);
+  app.use("/api/users/login", authLimiter);
 };

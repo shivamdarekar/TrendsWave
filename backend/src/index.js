@@ -7,7 +7,7 @@ import connectdb from "./config/DB.js";
 import cookieParser from "cookie-parser";
 import passport from "./config/passport.js";
 import session from "express-session";
-import { applySecurity } from "./security.js";
+import { applySecurity } from "./utils/security.js";
 
 //cors => It is a security feature built into browsers that controls how websites from different domains can talk to each other.
 //agar hamara frontend alag port pe hai & backend alag port pe to wo frontend api access karne ke liye cors use karte hai

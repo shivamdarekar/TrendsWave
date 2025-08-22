@@ -17,7 +17,7 @@ const Register = () => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const location = useLocation();  //Ye hook current URL ke baare me info deta hai, including search parameters, pathname etc.
-    
+
     const { user, guestId, loading } = useSelector((state) => state.auth);
     const { cart } = useSelector((state) => state.cart);
 
@@ -56,7 +56,11 @@ const Register = () => {
         setEmailError("");
 
         try {
-            await dispatch(registerUser({ name, email, password })).unwrap();
+            await dispatch(registerUser({
+                userData: { name, email, password },
+                endpoint: "/register",   // always customer route
+            })
+            ).unwrap()
         } catch (error) {
             console.error("Registration failed:", error);
 
@@ -154,7 +158,7 @@ const Register = () => {
 
                     {/* --- Google Sign-In Button --- */}
                     <div className="flex justify-center ">
-                        <GoogleSignInButton />
+                        <GoogleSignInButton role="customer" />
                     </div>
 
                     <button

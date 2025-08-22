@@ -81,11 +81,6 @@ const EditProductPage = () => {
   // Delete
   const handleDeleteImage = async (publicId) => {
 
-    if (productData.images.length === 1) {
-      toast.error("At least one product image is required", { duration: 1500 });
-      return;
-    }
-
     if (!window.confirm("Are you sure you want to delete this image?")) return;
 
     try {
@@ -107,6 +102,11 @@ const EditProductPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     //console.log(productData);
+    
+    if (productData.images.length < 1) {
+      toast.error("At least one product image is required", { duration: 1500 });
+      return;
+    }
     try {
       await dispatch(updateProduct({ id, productData })).unwrap();
       toast.success("Product updated successfully!", { duration: 1000 });

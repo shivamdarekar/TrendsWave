@@ -5,6 +5,8 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchProductDetails, fetchSimilarProducts } from "../../redux/slices/productsSlice";
 import { addToCart } from "../../redux/slices/cartSlice";
+import namer from "color-namer";
+
 
 // const selectedProduct = {
 //     name: "Stylish Jacket",
@@ -38,6 +40,15 @@ import { addToCart } from "../../redux/slices/cartSlice";
 //         images: [{ url: "https://picsum.photos/500/500?random=3" }],
 //     },
 // ];
+
+
+// Helper: match entered color name to HEX (fallback: raw name)
+const getColorHex = (colorName) => {
+    // Will return closest match from the palettes
+     if (!colorName) return null;
+    const result = namer(colorName);
+    return result ? result.html[0].hex : colorName;// e.g. "#000080" for "navy blue"
+  }
 
 const ProductDetails = ({ productId }) => {
 
@@ -156,7 +167,7 @@ const ProductDetails = ({ productId }) => {
 
                         {/* Main image */}
                         <div className="md:w-1/2">
-                            <div className="mb-4">
+                            <div className="mb-4 ">
                                 <img
                                     src={mainImage}
                                     alt="Main Product"
@@ -223,23 +234,25 @@ const ProductDetails = ({ productId }) => {
                             {/* Color */}
                             <div className="mb-4">
                                 <p className="text-gray-700 font-semibold">Color:</p>
-
                                 <div className="flex gap-2 mt-2">
-                                    {selectedProduct.colors.map((color) => (
-                                        <button
-                                            key={color}
-                                            onClick={() => setSelectedColor(color)}
-                                            className={`w-8 h-8 rounded-full border ${selectedColor === color ? "border-4 border-black" : "border-gray-300"
-                                                }`}
-                                            style={{
-                                                backgroundColor: color.toLocaleLowerCase(),
-                                                filter: "brightness(0.5)",
-                                            }}
-                                        ></button>
-                                    ))}
+                                    {selectedProduct.colors.map((color) => {
+                                        const hex = getColorHex(color);
+                                        return (
+                                            <button
+                                                key={color}
+                                                onClick={() => setSelectedColor(color)}
+                                                className={`w-8 h-8 rounded-full border ${selectedColor === color
+                                                        ? "border-4 border-black"
+                                                        : "border-gray-300"
+                                                    }`}
+                                                style={{
+                                                    backgroundColor: hex,
+                                                }}
+                                            ></button>
+                                        );
+                                    })}
                                 </div>
                             </div>
-
                             {/* Size */}
                             <div className="mb-4 ">
                                 <p className="text-gray-700 font-semibold">Size:</p>
