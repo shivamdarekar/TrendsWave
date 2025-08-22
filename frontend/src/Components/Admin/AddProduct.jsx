@@ -60,7 +60,6 @@ const AddProduct = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    //console.log(productData);
     try {
       await dispatch(createProduct({ productData })).unwrap();
       toast.success("Product added successfully!", { duration: 1000 });
