@@ -45,10 +45,10 @@ import namer from "color-namer";
 // Helper: match entered color name to HEX (fallback: raw name)
 const getColorHex = (colorName) => {
     // Will return closest match from the palettes
-     if (!colorName) return null;
+    if (!colorName) return null;
     const result = namer(colorName);
     return result ? result.html[0].hex : colorName;// e.g. "#000080" for "navy blue"
-  }
+}
 
 const ProductDetails = ({ productId }) => {
 
@@ -242,8 +242,8 @@ const ProductDetails = ({ productId }) => {
                                                 key={color}
                                                 onClick={() => setSelectedColor(color)}
                                                 className={`w-8 h-8 rounded-full border ${selectedColor === color
-                                                        ? "border-4 border-black"
-                                                        : "border-gray-300"
+                                                    ? "border-4 border-black"
+                                                    : "border-gray-300"
                                                     }`}
                                                 style={{
                                                     backgroundColor: hex,
@@ -304,18 +304,16 @@ const ProductDetails = ({ productId }) => {
 
                             <div className="mt-6 text-gray-700">
                                 <h3 className="text-xl font-bold mb-4">Characteristics:</h3>
-                                <table className="w-1/2 text-left text-sm text-gray-600">
-                                    <tbody>
-                                        <tr>
-                                            <td className="py-1">Brand:</td>
-                                            <td className="py-1">{selectedProduct.brand}</td>
-                                        </tr>
-                                        <tr>
-                                            <td className="py-1">Material:</td>
-                                            <td className="py-1">{selectedProduct.material}</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
+                                <div className="space-y-2 text-sm text-gray-600">
+                                    <div className="max-w-sm">
+                                        <span className="font-medium">Brand: </span>
+                                        <span className="whitespace-nowrap"> {selectedProduct.brand}</span>
+                                    </div>
+                                    <div className="max-w-sm">
+                                        <span className="font-medium">Material: </span>
+                                        <span className="whitespace-nowrap"> {selectedProduct.material}</span>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
