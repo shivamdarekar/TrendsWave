@@ -308,11 +308,11 @@ const ProductDetails = ({ productId }) => {
                                     <tbody>
                                         <tr>
                                             <td className="py-1">Brand:</td>
-                                            <td className="py-1 whitespace-nowrap">{selectedProduct.brand}</td>
+                                            <td className="py-1">{selectedProduct.brand}</td>
                                         </tr>
                                         <tr>
                                             <td className="py-1">Material:</td>
-                                            <td className="py-1 whitespace-nowrap">{selectedProduct.material}</td>
+                                            <td className="py-1">{selectedProduct.material}</td>
                                         </tr>
                                     </tbody>
                                 </table>
