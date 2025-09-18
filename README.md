@@ -1,4 +1,4 @@
-# 🌊 TrendsWave
+# TrendsWave
 
 ## 📝 Overview
 **TrendsWave** is a comprehensive **full-stack e-commerce platform** with separate interfaces for **customers** and **sellers**.  
