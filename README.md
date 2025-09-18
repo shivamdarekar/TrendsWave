@@ -1,7 +1,9 @@
 # TrendsWave
 
+
 ## 📝 Overview
 TrendsWave is a comprehensive full-stack e-commerce platform with separate interfaces for customers and sellers. The application offers a complete shopping experience with real payment integration through Razorpay, product management, order tracking, and secure authentication.
+
 
 ## ✨ Key Features
 
@@ -24,6 +26,7 @@ TrendsWave is a comprehensive full-stack e-commerce platform with separate inter
 - Order management system
 - Role-based authentication for secure access
 
+
 ## 🛠️ Technology Stack
 
 - **Frontend:** React.js, Redux Toolkit, Tailwind CSS (Responsive UI)
@@ -33,6 +36,7 @@ TrendsWave is a comprehensive full-stack e-commerce platform with separate inter
 - **Payment Gateway:** Razorpay Integration
 - **Deployment:** Frontend on Vercel | Backend on Render
 ## 📁 Project Structure
+
 
 ```
 TrendsWave/
@@ -58,7 +62,9 @@ TrendsWave/
 └── README.md              # Project documentation
 ```
 
+
 - 🌐 **Live Website:** [TrendsWave E-Commerce Platform](https://trendswave.vercel.app/)
+
 
 
 - ## 💡 Development Insights
