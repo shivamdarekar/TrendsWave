@@ -60,6 +60,7 @@ TrendsWave/
 
 - 🌐 **Live Website:** [TrendsWave E-Commerce Platform](https://trendswave.vercel.app/)
 
+
 - ## 💡 Development Insights
 
 During the development of TrendsWave, several key challenges were addressed:
