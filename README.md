@@ -1,11 +1,5 @@
 # TrendsWave
 
-<p align="center">
-  <img src="https://img.shields.io/badge/JavaScript-99.7%25-yellow" alt="JavaScript 99.7%">
-  <img src="https://img.shields.io/badge/Other-0.3%25-lightgrey" alt="Other 0.3%">
-  <img src="https://img.shields.io/badge/Status-Active-success" alt="Status: Active">
-</p>
-
 ## 📝 Overview
 TrendsWave is a comprehensive full-stack e-commerce platform with separate interfaces for customers and sellers. The application offers a complete shopping experience with real payment integration through Razorpay, product management, order tracking, and secure authentication.
 
@@ -64,7 +58,7 @@ TrendsWave/
 └── README.md              # Project documentation
 ```
 
-- 🌐 **Live Website:** [TrendsWave E-Commerce Platform](https://lnkd.in/dxs3ykEt)
+- 🌐 **Live Website:** [TrendsWave E-Commerce Platform](https://trendswave.vercel.app/)
 
 - ## 💡 Development Insights
 
