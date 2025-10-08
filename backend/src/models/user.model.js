@@ -75,10 +75,8 @@ userSchema.methods.generateAccessToken = function () {
   //short live access token
   return jwt.sign(
     {
-      //create jwt
+      //create jwt - only essential fields
       _id: this._id,
-      email: this.email,
-      name: this.name,
       role: this.role,
     },
     process.env.Access_Token_Secret,

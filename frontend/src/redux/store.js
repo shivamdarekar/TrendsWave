@@ -7,6 +7,7 @@ import orderReducer from "./slices/orderSlice.js"
 import adminProductReducer from "./slices/adminProductSlice.js"
 import adminOrderReducer from "./slices/adminOrderSlice.js";
 import uploadReducer from "./slices/uploadSlice.js"
+import healthReducer from "./slices/healthSlice.js"
 
 const store = configureStore({
     reducer: {
@@ -18,6 +19,7 @@ const store = configureStore({
         adminProducts: adminProductReducer,
         adminOrders: adminOrderReducer,
         upload: uploadReducer,
+        health: healthReducer,
     }
 });
 

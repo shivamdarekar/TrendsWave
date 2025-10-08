@@ -52,6 +52,8 @@ app.get("/", (req, res) => {
   res.send("welcome to our app");
 });
 
+
+
 //import routes
 import userRoutes from "./routes/user.routes.js";
 import productRoutes from "./routes/products.routes.js";
@@ -64,8 +66,10 @@ import productAdminRoutes from "./routes/adminProductsRoutes.js";
 import orderAdminRoutes from "./routes/adminOrderRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
 import razorpayRoutes from "./routes/razorpay.routes.js"
+import healthRoutes from "./routes/health.routes.js"
 
 //setup routes
+app.use("/api", healthRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/cart", cartRoutes);

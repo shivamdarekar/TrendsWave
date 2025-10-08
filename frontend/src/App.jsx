@@ -18,33 +18,66 @@ import EditProductPage from "./Components/Admin/EditProductPage.jsx"
 import OrderManagement from "./Components/Admin/OrderManagement.jsx"
 import AddProduct from "./Components/Admin/AddProduct.jsx"
 import NotFound from "./pages/NotFound.jsx"
+import { checkBackendHealth } from "./redux/slices/healthSlice.js";
 
 import { Provider, useDispatch, useSelector } from "react-redux";
 import ProtectedRoute from "./Components/Common/ProtectedRoute.jsx"
 import SellerRegister from "./pages/SellerRegister.jsx"
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import { fetchCurrentUser } from "./redux/slices/authSlice.js"
 
 function App() {
 
-  const dispatch = useDispatch();
+   const dispatch = useDispatch();
+  const [initialLoadAttempted, setInitialLoadAttempted] = useState(false);
+  const [showInitialLoading, setShowInitialLoading] = useState(true);
+  const { status: backendStatus } = useSelector(state => state.health);
 
-   const { authLoading } = useSelector((state) => state.auth);
-
-  // This will now work correctly because the Provider is in main.jsx
+  // First check if backend is awake
   useEffect(() => {
-    dispatch(fetchCurrentUser());
+    const wakeBackend = async () => {
+      try {
+        // Try to wake backend with health check
+        await dispatch(checkBackendHealth()).unwrap();
+      } catch {
+        console.log('Backend health check failed, will still attempt auth');
+      }
+
+      // Continue with authentication regardless of health check result
+      try {
+        await dispatch(fetchCurrentUser()).unwrap();
+      } catch{
+        console.log('Auth check failed, continuing as guest');
+      } finally {
+        setInitialLoadAttempted(true);
+      }
+    };
+    
+    wakeBackend();
   }, [dispatch]);
 
-   // If the initial auth check is still running, show a loading indicator
-  if (authLoading) {
+  // Show loading for maximum 3 seconds
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowInitialLoading(false);
+    }, 4000); // Show loading for max 4 seconds
+    
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (showInitialLoading && !initialLoadAttempted) {
     return (
       <div className="flex justify-center items-center h-screen text-2xl">
-        <p>Loading...</p> {/* Or a fancy spinner component */}
+        <div className="text-center">
+          <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p>Loading TrendsWave...</p>
+          {backendStatus === "offline" && (
+            <p className="text-sm text-gray-500 mt-2">Waking up server...</p>
+          )}
+        </div>
       </div>
     );
   }
-
   
   return (
     

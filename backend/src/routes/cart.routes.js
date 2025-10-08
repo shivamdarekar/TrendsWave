@@ -74,7 +74,6 @@ router.post("/", async (req, res) => {
   0
 );
 
-
         //reduce() ek array method hai jo array ko ek single value me reduce karta hai. Jaise total sum, average, or merging.
         //accumalator mai hum total value store kr rahe hai
         //We use .reduce() only when the cart already has multiple products, and we need to calculate the total of all of them.
