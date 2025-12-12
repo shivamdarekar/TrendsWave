@@ -59,6 +59,9 @@ router.post("/order", protect, async (req, res) => {
 });
 
 router.post("/verify", protect, async (req, res) => {
+  const session = await Checkout.startSession();
+  session.startTransaction();
+
   try {
     const {
       checkoutId,
@@ -68,17 +71,29 @@ router.post("/verify", protect, async (req, res) => {
     } = req.body;
 
     if (!razorpay_payment_id || !razorpay_order_id || !razorpay_signature) {
+      await session.abortTransaction();
       return res
         .status(400)
         .json({ message: "Missing Razorpay payment params" });
     }
 
-    const checkout = await Checkout.findById(checkoutId);
+    const checkout = await Checkout.findById(checkoutId).session(session);
     if (!checkout) {
+      await session.abortTransaction();
       return res.status(404).json({ message: "Checkout not found" });
     }
 
+    // CRITICAL: Check if already verified - prevents double processing
+    if (checkout.isPaid === true) {
+      await session.abortTransaction();
+      return res.json({ 
+        success: true, 
+        message: "Payment already processed" 
+      });
+    }
+
     if (checkout.user.toString() !== req.user._id.toString()) {
+      await session.abortTransaction();
       return res.status(403).json({ message: "Unauthorized" });
     }
 
@@ -89,25 +104,35 @@ router.post("/verify", protect, async (req, res) => {
       .digest("hex");
 
     if (expected !== razorpay_signature) {
+      await session.abortTransaction();
       return res.status(400).json({ message: "Invalid signature" });
     }
 
-    // Mark checkout paid (reuses your existing pay fields)
-    checkout.isPaid = true;
-    checkout.paymentStatus = "paid";
-    checkout.paidAt = new Date();
-    checkout.paymentDetails = {
-      provider: "razorpay",
-      orderId: razorpay_order_id,
-      paymentId: razorpay_payment_id,
-      signature: razorpay_signature,
-    };
-    await checkout.save();
+    // Mark checkout paid atomically
+    const updatedCheckout = await Checkout.findByIdAndUpdate(
+      checkoutId,
+      {
+        isPaid: true,
+        paymentStatus: "paid",
+        paidAt: new Date(),
+        paymentDetails: {
+          provider: "razorpay",
+          orderId: razorpay_order_id,
+          paymentId: razorpay_payment_id,
+          signature: razorpay_signature,
+        },
+      },
+      { session, new: true }
+    );
 
-    return res.json({ success: true });
+    await session.commitTransaction();
+    return res.json({ success: true, checkout: updatedCheckout });
   } catch (err) {
+    await session.abortTransaction();
     console.error("Razorpay verify error:", err);
     return res.status(500).json({ message: "Verification failed" });
+  } finally {
+    session.endSession();
   }
 });
 

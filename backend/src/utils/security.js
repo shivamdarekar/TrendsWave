@@ -7,7 +7,7 @@ export const applySecurity = (app) => {
   //  Secure HTTP headers
   app.use(helmet());
 
-  //  Global API rate limiter (100 requests / 15min per IP)
+  //  Global API rate limiter (150 requests / 15min per IP)
   const apiLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
     max: 150, 
@@ -20,7 +20,7 @@ export const applySecurity = (app) => {
   //  Stricter limiter for auth routes (e.g., prevent brute force login)
   const authLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 8, // only 5 login attempts in 15 minutes
+    max: 8, // only 8 login attempts in 15 minutes
     message: "Too many login attempts, please try again later.",
   });
   app.use("/api/users/login", authLimiter);

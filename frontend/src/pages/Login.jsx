@@ -12,6 +12,7 @@ const Login = () => {
     const [password, setPassword] = useState("");
     const [passwordError, setPasswordError] = useState("");
     const [loginError, setLoginError] = useState("");
+    const [isLoggingIn, setIsLoggingIn] = useState(false); // ADDED: Prevent double login
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const location = useLocation();  //Ye hook current URL ke baare me info deta hai, including search parameters, pathname etc.
@@ -37,6 +38,12 @@ const Login = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();  //Stops the page from refreshing when the form is submitted.
+        
+        // FIXED: Prevent multiple simultaneous logins
+        if (isLoggingIn) {
+            return;
+        }
+
         setLoginError("");
         if (password.length < 6) {
             setPasswordError("Password must be at least 6 characters.");
@@ -44,14 +51,16 @@ const Login = () => {
         } else {
             setPasswordError("");
         }
+
+        setIsLoggingIn(true); // Prevent double submission
+
         try {
             const result = await dispatch(loginUser({ email, password })).unwrap();
-            // Fetch cart for the logged-in user
-            if (result && result._id) {
-                dispatch(fetchCart({ userId: result._id, guestId }))
-            }
+            // Login success - cart merge will happen in useEffect when user changes
         } catch {
             setLoginError("Invalid email or password.");
+        } finally {
+            setIsLoggingIn(false);
         }
     }
 
@@ -116,9 +125,10 @@ const Login = () => {
                     )}
                     <button
                         type="submit"
-                        className="w-full bg-black text-white p-2 rounded-lg font-semibold hover:bg-gray-800 transition"
+                        disabled={isLoggingIn || loading}
+                        className="w-full bg-black text-white p-2 rounded-lg font-semibold hover:bg-gray-800 transition disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                        {loading ? "Loading..." : "Sign In"}
+                        {isLoggingIn ? "Logging in..." : loading ? "Loading..." : "Sign In"}
                     </button>
 
                     

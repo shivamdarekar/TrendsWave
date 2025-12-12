@@ -149,7 +149,7 @@ const authSlice = createSlice({
         state.error = action.payload.message;
       })
 
-      //fetc current user
+      //fetch current user
       .addCase(fetchCurrentUser.pending, (state) => {
         state.authLoading = true;
       })

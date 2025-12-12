@@ -22,6 +22,7 @@ const Checkout = () => {
     const [checkoutId, setCheckoutId] = useState(null);
     const [rzpOrder, setRzpOrder] = useState(null);
     const [processing, setProcessing] = useState(false);
+    const [isCreatingCheckout, setIsCreatingCheckout] = useState(false); // ADDED: Prevent double checkout
 
     const dispatch = useDispatch();
     const { cart, loading, error } = useSelector((state) => state.cart);
@@ -71,7 +72,16 @@ const Checkout = () => {
 
     const handleCreateCheckout = async (e) => {
         e.preventDefault();
+        
+        // FIXED: Prevent multiple simultaneous checkout creations
+        if (processing || isCreatingCheckout) {
+            alert("Checkout already in progress");
+            return;
+        }
+
+        setIsCreatingCheckout(true);
         setProcessing(true);
+        
         try {
             if (cart && cart.products.length > 0) {
                 const res = await dispatch(
@@ -97,7 +107,8 @@ const Checkout = () => {
             console.error(error);
             alert("Something went wrong. Please try again.");
         } finally {
-            setProcessing(false); // re-enable
+            setIsCreatingCheckout(false);
+            setProcessing(false);
         }
     };
 
@@ -351,10 +362,10 @@ const Checkout = () => {
                         {!checkoutId ? (
                             <button
                                 type="submit"
-                                className="w-full bg-black text-white py-3 rounded flex items-center justify-center disabled:opacity-50"
-                                disabled={processing}
+                                className="w-full bg-black text-white py-3 rounded flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
+                                disabled={processing || isCreatingCheckout}
                             >
-                                {processing ? (
+                                {processing || isCreatingCheckout ? (
                                     <div className="flex items-center gap-2">
                                         <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                                         <span>Processing...</span>
@@ -369,10 +380,10 @@ const Checkout = () => {
                                 <button
                                     type="button"
                                     onClick={handlePayWithRazorpay}
-                                    className="w-full bg-black text-white py-3 rounded flex items-center justify-center disabled:opacity-50"
-                                    disabled={processing}
+                                    className="w-full bg-black text-white py-3 rounded flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
+                                    disabled={processing || isCreatingCheckout}
                                 >
-                                    {processing ? (
+                                    {processing || isCreatingCheckout ? (
                                         <div className="flex items-center gap-2">
                                             <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                                             <span>Processing Payment...</span>

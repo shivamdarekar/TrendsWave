@@ -45,34 +45,54 @@ router.post("/", protect, async (req, res) => {
 //access -> private
 
 router.post("/:id/finalize", protect, async (req, res) => {
+  const session = await Checkout.startSession();
+  session.startTransaction();
+
   try {
-    const checkout = await Checkout.findById(req.params.id);
+    const checkout = await Checkout.findById(req.params.id).session(session);
 
     if (!checkout) {
+      await session.abortTransaction();
       return res.status(404).json({ message: "Checkout session not found." });
     }
 
     // Make sure the checkout belongs to the logged-in user
     if (checkout.user.toString() !== req.user._id.toString()) {
+      await session.abortTransaction();
       return res
         .status(403)
         .json({ message: "Unauthorized to finalize this checkout." });
     }
 
     if (!checkout.isPaid) {
+      await session.abortTransaction();
       return res
         .status(400)
         .json({ message: "Checkout is not marked as paid yet." });
     }
 
-    if (checkout.isFinalized) {
+    // CRITICAL: Use atomic update to mark as finalized and prevent duplicate processing
+    const finalizedCheckout = await Checkout.findByIdAndUpdate(
+      req.params.id,
+      { 
+        $set: { 
+          isFinalized: true,
+          finalizedAt: new Date()
+        } 
+      },
+      { session, new: true }
+    );
+
+    // If it was already finalized, abort this transaction
+    if (!finalizedCheckout || (checkout.isFinalized && checkout.finalizedAt)) {
+      await session.abortTransaction();
       return res
         .status(400)
         .json({ message: "This checkout has already been finalized." });
     }
 
     // BUILD ORDER ITEMS — **freeze the paid price** here
-    const orderItems = checkout.checkoutItems.map((item) => {
+    const orderItems = finalizedCheckout.checkoutItems.map((item) => {
       const paidUnitPrice =
         typeof item.discountPrice === "number" && item.discountPrice > 0
           ? item.discountPrice
@@ -90,33 +110,48 @@ router.post("/:id/finalize", protect, async (req, res) => {
       };
     });
 
-    // Compute total price from the frozen order items (avoid re-calculating using product DB)
+    // Compute total price from the frozen order items
     const totalPrice = orderItems.reduce(
       (acc, it) => acc + it.price * it.quantity,
       0
     );
 
-    // Create final order
-    const finalOrder = await Order.create({
-      user: checkout.user,
-      orderItems,
-      shippingAddress: checkout.shippingAddress,
-      paymentMethod: checkout.paymentMethod,
-      totalPrice,
-      isPaid: true,
-      paidAt: checkout.paidAt,
-      isDelivered: false,
-      paymentStatus: "paid",
-      paymentDetails: checkout.paymentDetails,
+    // Create final order atomically
+    const finalOrder = await Order.create(
+      [{
+        user: finalizedCheckout.user,
+        orderItems,
+        shippingAddress: finalizedCheckout.shippingAddress,
+        paymentMethod: finalizedCheckout.paymentMethod,
+        totalPrice,
+        isPaid: true,
+        paidAt: finalizedCheckout.paidAt,
+        isDelivered: false,
+        paymentStatus: "paid",
+        paymentDetails: finalizedCheckout.paymentDetails,
+      }],
+      { session }
+    );
+
+    // Delete the cart associated with user atomically
+    await Cart.findOneAndDelete({ user: finalizedCheckout.user }, { session });
+
+    await session.commitTransaction();
+
+    return res.status(201).json({
+      message: "Order successfully created from checkout.",
+      order: finalOrder[0],
     });
-
-    // mark checkout finalized
-    checkout.isFinalized = true;
-    checkout.finalizeAt = new Date();
-    await checkout.save();
-
-    // delete the cart associated with user
-    await Cart.findOneAndDelete({ user: checkout.user });
+  } catch (error) {
+    await session.abortTransaction();
+    console.error("Finalize error:", error.message);
+    return res
+      .status(500)
+      .json({ message: "Server error while finalizing checkout." });
+  } finally {
+    session.endSession();
+  }
+});
 
     return res.status(201).json({
       message: "Order successfully created from checkout.",
