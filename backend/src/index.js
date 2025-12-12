@@ -21,10 +21,27 @@ app.use(express.json());
 // trust proxy for correct IP
 app.set("trust proxy", 1);
 
-// CORS setup (only allow frontend origin)
++// CORS setup - Allow frontend origins (development and production)
+const allowedOrigins = [
+  process.env.FRONTEND_URL,           // Production frontend from .env
+  "http://localhost:5173",             // Local development (Vite default)
+  "http://localhost:3000",             // Alternative local development
+  "https://trendswave.vercel.app",     // Vercel production domain
+];
+
 app.use(cors({
-    origin: process.env.FRONTEND_URL,
-    credentials: true, // allow cookies/session
+    origin: function (origin, callback) {
+      // Allow requests with no origin (like mobile apps, curl requests)
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("CORS not allowed for this origin: " + origin));
+      }
+    },
+    credentials: true, // Allow cookies/session
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+    maxAge: 3600, // Cache preflight requests for 1 hour
   })
 );
 

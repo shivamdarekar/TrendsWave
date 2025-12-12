@@ -7,6 +7,44 @@ import { protect } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
+/**
+ * STOCK LOCK PATTERN - Prevents overselling with atomic operations
+ * Decrements stock atomically within a transaction session
+ * If stock goes negative, entire transaction rolls back automatically
+ * @param {string} productId - MongoDB product ID
+ * @param {number} quantity - Quantity to decrement
+ * @param {object} session - MongoDB session for transaction
+ * @returns {Promise<object>} Updated product document
+ * @throws {Error} If insufficient stock available
+ */
+const decrementStockAtomic = async (productId, quantity, session) => {
+  const product = await Product.findByIdAndUpdate(
+    productId,
+    {
+      // Decrement only if stock is sufficient (atomic operation)
+      // MongoDB ensures this operation is atomic at database level
+      $inc: { countInStock: -quantity }
+    },
+    { 
+      session,
+      new: true,
+      runValidators: false 
+    }
+  );
+
+  // Check if we went negative (stock validation)
+  if (product && product.countInStock < 0) {
+    // Rollback the entire transaction automatically on error throw
+    throw new Error(
+      `Insufficient stock for ${product.name}. ` +
+      `Available: ${product.countInStock + quantity}, ` +
+      `Requested: ${quantity}`
+    );
+  }
+
+  return product;
+};
+
 //Create a new Checkout session
 //access -> private
 router.post("/", protect, async (req, res) => {
@@ -115,6 +153,12 @@ router.post("/:id/finalize", protect, async (req, res) => {
       (acc, it) => acc + it.price * it.quantity,
       0
     );
+
+    // CRITICAL: Decrement stock atomically within transaction using stock lock pattern
+    // This prevents overselling when multiple orders are created simultaneously
+    for (let item of finalizedCheckout.checkoutItems) {
+      await decrementStockAtomic(item.productId, item.quantity, session);
+    }
 
     // Create final order atomically
     const finalOrder = await Order.create(

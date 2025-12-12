@@ -103,8 +103,12 @@ const ProductDetails = ({ productId }) => {
 
 
     const handleQuantitychange = (action) => {
-        if (action === "plus") setQuantity((prev) => prev + 1);
-        if (action === "minus" && quantity > 1) setQuantity((prev) => prev - 1);
+        if (action === "plus" && quantity < selectedProduct.countInStock) {
+            setQuantity((prev) => prev + 1);
+        }
+        if (action === "minus" && quantity > 1) {
+            setQuantity((prev) => prev - 1);
+        }
     };
 
     const handleAddToCart = () => {
@@ -228,6 +232,31 @@ const ProductDetails = ({ productId }) => {
                             {/* Optional: Taxes note */}
                             <p className="text-sm text-green-600 mb-2">inclusive of all taxes</p>
 
+                            {/* Stock Status - ADDED: Shows availability and low stock warning */}
+                            <div className="mb-4 p-3 rounded-lg bg-gray-50 border border-gray-200">
+                                {selectedProduct.countInStock > 0 ? (
+                                    <>
+                                        <p className="text-sm font-semibold text-green-700">
+                                            ✓ In Stock
+                                        </p>
+                                        {selectedProduct.countInStock <= 5 && selectedProduct.countInStock > 0 && (
+                                            <p className="text-xs text-orange-600 mt-1 font-medium">
+                                                ⚠️ Only {selectedProduct.countInStock} left - Limited stock!
+                                            </p>
+                                        )}
+                                        {selectedProduct.countInStock > 5 && (
+                                            <p className="text-xs text-gray-600 mt-1">
+                                                {selectedProduct.countInStock} items available
+                                            </p>
+                                        )}
+                                    </>
+                                ) : (
+                                    <p className="text-sm font-semibold text-red-700">
+                                        ✗ Out of Stock
+                                    </p>
+                                )}
+                            </div>
+
 
                             <p className="text-gray-700 mb-4">{selectedProduct.description}</p>
 
@@ -276,7 +305,8 @@ const ProductDetails = ({ productId }) => {
                                 <div className=" flex items-center space-x-4 mt-2">
                                     <button
                                         onClick={() => handleQuantitychange("minus")}
-                                        className="px-2 py-1 bg-gray-200 rounded text-lg hover:bg-gray-300 transition"
+                                        className="px-2 py-1 bg-gray-200 rounded text-lg hover:bg-gray-300 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                                        disabled={quantity === 1}
                                     >
                                         -
                                     </button>
@@ -285,21 +315,32 @@ const ProductDetails = ({ productId }) => {
 
                                     <button
                                         onClick={() => handleQuantitychange("plus")}
-                                        className="px-2 py-1 bg-gray-200 rounded text-lg hover:bg-gray-300 transition"
+                                        className="px-2 py-1 bg-gray-200 rounded text-lg hover:bg-gray-300 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                                        disabled={quantity >= selectedProduct.countInStock}
                                     >
                                         +
                                     </button>
                                 </div>
+                                {quantity >= selectedProduct.countInStock && selectedProduct.countInStock > 0 && (
+                                    <p className="text-xs text-orange-600 mt-2 font-medium">
+                                        Maximum quantity reached (Only {selectedProduct.countInStock} in stock)
+                                    </p>
+                                )}
                             </div>
 
                             <button
                                 onClick={handleAddToCart}
-                                disabled={isButtonDisabled}
+                                disabled={isButtonDisabled || selectedProduct.countInStock === 0}
                                 className={`bg-black text-white px-6 py-2 rounded w-full mb-4 
-                                ${isButtonDisabled ? "cursor-not-allowed opacity-50" : "hover:bg-gray-900"}
+                                ${(isButtonDisabled || selectedProduct.countInStock === 0) ? "cursor-not-allowed opacity-50" : "hover:bg-gray-900"}
                                 `}
                             >
-                                {isButtonDisabled ? "Adding..." : "ADD TO CART"}
+                                {selectedProduct.countInStock === 0 
+                                    ? "OUT OF STOCK" 
+                                    : isButtonDisabled 
+                                    ? "Adding..." 
+                                    : "ADD TO CART"
+                                }
                             </button>
 
                             <div className="mt-6 text-gray-700">
