@@ -197,16 +197,4 @@ router.post("/:id/finalize", protect, async (req, res) => {
   }
 });
 
-    return res.status(201).json({
-      message: "Order successfully created from checkout.",
-      order: finalOrder,
-    });
-  } catch (error) {
-    console.error("Finalize error:", error.message);
-    return res
-      .status(500)
-      .json({ message: "Server error while finalizing checkout." });
-  }
-});
-
 export default router;
