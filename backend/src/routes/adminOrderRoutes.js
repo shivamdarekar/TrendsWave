@@ -57,26 +57,23 @@ router.put("/:id", protect, admin, async (req, res) => {
       return res.status(400).json({ message: "Status field is required" });
     }
 
-    const order = await Order.findById(req.params.id).populate(
-      "user",
-      "name email"
-    );
+    const isDelivered = status.toLowerCase() === "delivered";
 
-    if (!order) {
+    const updatedOrder = await Order.findByIdAndUpdate(
+      req.params.id,
+      {
+        $set: {
+          status,
+          isDelivered,
+          deliveredAt: isDelivered ? new Date() : null,
+        },
+      },
+      { new: true, runValidators: true }
+    ).populate("user", "name email");
+
+    if (!updatedOrder) {
       return res.status(404).json({ message: "Order not found" });
     }
-
-    order.status = status;
-
-    if (status.toLowerCase() === "delivered") {
-      order.isDelivered = true;
-      order.deliveredAt = Date.now();
-    } else {
-      order.isDelivered = false;
-      order.deliveredAt = null;
-    }
-
-    const updatedOrder = await order.save();
 
     return res.status(200).json({
       message: "Order status updated successfully",
@@ -84,9 +81,7 @@ router.put("/:id", protect, admin, async (req, res) => {
     });
   } catch (error) {
     console.error("Update Order Error:", error);
-    return res
-      .status(500)
-      .json({ message: "Server error while updating order status" });
+    return res.status(500).json({ message: "Server error while updating order status" });
   }
 });
 

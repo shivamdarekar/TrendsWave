@@ -13,7 +13,7 @@ export const fetchAdminProducts = createAsyncThunk(
       const response = await axios.get(`${API_URL}/api/admin/products`);
       return response.data;
     } catch (error) {
-      return rejectWithValue(error.response.data);
+      return rejectWithValue(error.response?.data || { message: "Network error" });
     }
   }
 );
@@ -29,7 +29,7 @@ export const createProduct = createAsyncThunk(
       );
       return response.data;
     } catch (error) {
-      return rejectWithValue(error.response.data);
+      return rejectWithValue(error.response?.data || { message: "Network error" });
     }
   }
 );
@@ -40,12 +40,12 @@ export const updateProduct = createAsyncThunk(
   async ({ id, productData }, { rejectWithValue }) => {
     try {
       const response = await axios.put(
-        `${API_URL}.api/products/${id}`,
+        `${API_URL}/api/products/${id}`,
         productData
       );
       return response.data;
     } catch (error) {
-      return rejectWithValue(error.response.data);
+      return rejectWithValue(error.response?.data || { message: "Network error" });
     }
   }
 );
@@ -58,7 +58,7 @@ export const deleteProduct = createAsyncThunk(
       await axios.delete(`${API_URL}/api/products/${id}`);
       return id;
     } catch (error) {
-      return rejectWithValue(error.response.data);
+      return rejectWithValue(error.response?.data || { message: "Network error" });
     }
   }
 );

@@ -13,7 +13,7 @@ export const fetchAllOrders = createAsyncThunk(
       const response = await axios.get(`${API_URL}/api/admin/orders`);
       return response.data;
     } catch (error) {
-      return rejectWithValue(error.response.data);
+      return rejectWithValue(error.response?.data || { message: "Network error" });
     }
   }
 );
@@ -28,7 +28,7 @@ export const updateOrderStatus = createAsyncThunk(
       });
       return response.data;
     } catch (error) {
-      return rejectWithValue(error.response.data);
+      return rejectWithValue(error.response?.data || { message: "Network error" });
     }
   }
 );
@@ -41,7 +41,7 @@ export const deleteOrder = createAsyncThunk(
       await axios.delete(`${API_URL}/api/admin/orders/${id}`);
       return id;
     } catch (error) {
-      return rejectWithValue(error.response.data);
+      return rejectWithValue(error.response?.data || { message: "Network error" });
     }
   }
 );
@@ -75,7 +75,7 @@ const adminOrderSlice = createSlice({
       })
       .addCase(fetchAllOrders.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload.message;
+        state.error = action.payload?.message || "Failed to fetch orders";
       })
 
       //update order status
@@ -90,7 +90,7 @@ const adminOrderSlice = createSlice({
       })
       .addCase(updateOrderStatus.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload.message;
+        state.error = action.payload?.message || "Failed to update order";
       })
 
       //delete order
@@ -101,7 +101,7 @@ const adminOrderSlice = createSlice({
       })
       .addCase(deleteOrder.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload.message;
+        state.error = action.payload?.message || "Failed to delete order";
       });
   },
 });
