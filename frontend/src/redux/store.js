@@ -8,6 +8,7 @@ import adminProductReducer from "./slices/adminProductSlice.js"
 import adminOrderReducer from "./slices/adminOrderSlice.js";
 import uploadReducer from "./slices/uploadSlice.js"
 import healthReducer from "./slices/healthSlice.js"
+import chatReducer from "./slices/chatSlice.js";
 
 const store = configureStore({
     reducer: {
@@ -20,6 +21,7 @@ const store = configureStore({
         adminOrders: adminOrderReducer,
         upload: uploadReducer,
         health: healthReducer,
+        chat: chatReducer,
     }
 });
 

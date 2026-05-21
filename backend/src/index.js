@@ -67,6 +67,7 @@ import orderAdminRoutes from "./routes/adminOrderRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
 import razorpayRoutes from "./routes/razorpay.routes.js"
 import healthRoutes from "./routes/health.routes.js"
+import chatRoutes from "./routes/chat.routes.js"
 
 //setup routes
 app.use("/api", healthRoutes);
@@ -81,6 +82,7 @@ app.use("/api/admin/products", productAdminRoutes);
 app.use("/api/admin/orders", orderAdminRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/razorpay", razorpayRoutes);
+app.use("/api/chat", chatRoutes);
 
 app.listen(port, () => {
   console.log(`server is running on http://localhost:${port}`);
