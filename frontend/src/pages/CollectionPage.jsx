@@ -3,7 +3,7 @@ import { FaFilter } from "react-icons/fa"
 import FilterSidebar from "../Components/Products/FilterSidebar"
 import SortOptions from "../Components/Products/SortOptions"
 import ProductGrid from "../Components/Products/ProductGrid"
-import { useParams, useSearchParams } from "react-router-dom"
+import { useParams, useSearchParams, useNavigate } from "react-router-dom"
 import { useDispatch, useSelector } from "react-redux"
 import { fetchProductsByFilters } from "../redux/slices/productsSlice"
 
@@ -11,6 +11,7 @@ const CollectionPage = () => {
 
     const { collection } = useParams();
     const [searchParams] = useSearchParams();
+    const navigate = useNavigate();
     const dispatch = useDispatch();
     const { products, loading, error } = useSelector((state) => state.products);
     const queryParams = Object.fromEntries([...searchParams]);
@@ -103,7 +104,19 @@ const CollectionPage = () => {
                 <SortOptions />
 
                 {/* product Grid */}
-                <ProductGrid products={products} loading={loading} error={error} />
+                {!loading && !error && products.length === 0 ? (
+                    <div className="flex flex-col items-center py-16 text-gray-500">
+                        <p className="text-lg mb-4">No products found for the selected filters.</p>
+                        <button
+                            onClick={() => navigate(`/collections/${collection}`)}
+                            className="px-4 py-2 bg-black text-white rounded hover:bg-gray-800 text-sm"
+                        >
+                            Clear Filters
+                        </button>
+                    </div>
+                ) : (
+                    <ProductGrid products={products} loading={loading} error={error} />
+                )}
             </div>
         </div>
     )

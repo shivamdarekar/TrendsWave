@@ -28,48 +28,38 @@ import { fetchCurrentUser } from "./redux/slices/authSlice.js"
 
 function App() {
 
-   const dispatch = useDispatch();
-  const [initialLoadAttempted, setInitialLoadAttempted] = useState(false);
-  const [showInitialLoading, setShowInitialLoading] = useState(true);
+  const dispatch = useDispatch();
+  const [appReady, setAppReady] = useState(false);
   const { status: backendStatus } = useSelector(state => state.health);
 
-  // First check if backend is awake
   useEffect(() => {
-    const wakeBackend = async () => {
+    const timer = setTimeout(() => setAppReady(true), 4000); // max fallback
+
+    const init = async () => {
       try {
-        // Try to wake backend with health check
         await dispatch(checkBackendHealth()).unwrap();
       } catch {
-        console.log('Backend health check failed, will still attempt auth');
+        // backend offline, continue anyway
       }
-
-      // Continue with authentication regardless of health check result
       try {
         await dispatch(fetchCurrentUser()).unwrap();
-      } catch{
-        console.log('Auth check failed, continuing as guest');
+      } catch {
+        // not logged in, continue as guest
       } finally {
-        setInitialLoadAttempted(true);
+        clearTimeout(timer);
+        setAppReady(true);
       }
     };
-    
-    wakeBackend();
+
+    init();
+    return () => clearTimeout(timer);
   }, [dispatch]);
 
-  // Show loading for maximum 3 seconds
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setShowInitialLoading(false);
-    }, 4000); // Show loading for max 4 seconds
-    
-    return () => clearTimeout(timer);
-  }, []);
-
-  if (showInitialLoading && !initialLoadAttempted) {
+  if (!appReady) {
     return (
       <div className="flex justify-center items-center h-screen text-2xl">
         <div className="text-center">
-          <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <div className="w-8 h-8 border-4 border-gray-200 border-t-black rounded-full animate-spin mx-auto mb-4"></div>
           <p>Loading TrendsWave...</p>
           {backendStatus === "offline" && (
             <p className="text-sm text-gray-500 mt-2">Waking up server...</p>

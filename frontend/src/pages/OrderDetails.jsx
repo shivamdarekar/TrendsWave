@@ -4,6 +4,7 @@ import { useDispatch } from "react-redux";
 import { useNavigate, useParams, Link } from "react-router-dom";
 import { fetchOrderDetails } from "../redux/slices/orderSlice";
 import { useSelector } from "react-redux";
+import Spinner from "../Components/Common/Spinner";
 
 const OrderDetails = () => {
   const { id } = useParams();
@@ -21,9 +22,7 @@ const OrderDetails = () => {
       });
   }, [dispatch, id, navigate]);
 
-  if (loading) {
-    return <p className="text-center">Loading...</p>;
-  }
+  if (loading) return <Spinner />;
 
   if (error) {
     return <p className="text-center">Error: {error}</p>;
@@ -120,7 +119,7 @@ const OrderDetails = () => {
                     {/* Use the frozen price stored in order item */}
                     <td className="py-3 px-4 text-center">₹{(item.price).toFixed(2)}</td>
                     <td className="py-3 px-4 text-center">{item.quantity}</td>
-                    <td className="py-3 px-4 text-center">₹{(item.price * item.quantity)}</td>
+                    <td className="py-3 px-4 text-center">₹{(item.price * item.quantity).toFixed(2)}</td>
                   </tr>
                 ))}
               </tbody>

@@ -1,43 +1,40 @@
 import { RiDeleteBin3Line } from "react-icons/ri"
 import { useDispatch } from "react-redux"
-import { removeFromCart, updateCartQuantity } from "../../redux/slices/cartSlice";
+import { removeFromCart, updateCartQuantity, optimisticUpdateQuantity, optimisticRemoveItem } from "../../redux/slices/cartSlice";
+import { toast } from "sonner";
 
 const CartContents = ({ cart, userId, guestId }) => {
-    
-    // const cartProducts = [
-    //     {
-    //         productId: 1,
-    //         name: "T-Shirt",
-    //         size: "M",
-    //         color: "Red",
-    //         quantity: 5,
-    //         price: 15000,
-    //         image: "https://picsum.photos/200?random=1"
-    //     },
-    // ]
 
     const dispatch = useDispatch();
 
-    //handle adding and substrating to cart
     const handleAddCart = (productId, delta, quantity, size, color) => {
         const newQuantity = quantity + delta;
-        if (newQuantity >= 1) {
-            dispatch(
-                updateCartQuantity({
-                    productId,
-                    quantity: newQuantity,
-                    guestId,
-                    userId,
-                    size,
-                    color,
-                })
-            )
-        }
+        if (newQuantity < 1) return;
+
+        // 1. Update UI instantly
+        dispatch(optimisticUpdateQuantity({ productId, quantity: newQuantity, size, color }));
+
+        // 2. Sync with server in background, revert on failure
+        dispatch(updateCartQuantity({ productId, quantity: newQuantity, guestId, userId, size, color }))
+            .unwrap()
+            .catch(() => {
+                // Revert optimistic update
+                dispatch(optimisticUpdateQuantity({ productId, quantity, size, color }));
+                toast.error("Failed to update quantity", { duration: 1500 });
+            });
     };
 
     const handleRemoveFromCart = (productId, size, color) => {
-        dispatch(removeFromCart({ productId, guestId, userId, size, color }));
-    }
+        // 1. Remove from UI instantly
+        dispatch(optimisticRemoveItem({ productId, size, color }));
+
+        // 2. Sync with server in background
+        dispatch(removeFromCart({ productId, guestId, userId, size, color }))
+            .unwrap()
+            .catch(() => {
+                toast.error("Failed to remove item. Please refresh.", { duration: 1500 });
+            });
+    };
 
     return (
         <div>
@@ -61,6 +58,7 @@ const CartContents = ({ cart, userId, guestId }) => {
 
                             <div className="flex items-center mt-2">
                                 <button
+                                    aria-label="Decrease quantity"
                                     onClick={() => 
                                         handleAddCart(
                                             product.productId,
@@ -77,7 +75,8 @@ const CartContents = ({ cart, userId, guestId }) => {
                                 <span className="mx-4">{product.quantity}</span>
 
                                 <button
-                                     onClick={() => 
+                                    aria-label="Increase quantity"
+                                    onClick={() => 
                                         handleAddCart(
                                             product.productId,
                                             1,

@@ -24,17 +24,19 @@ const Login = () => {
     const isCheckoutRedirect = redirect.includes("checkout");
 
     useEffect(() => {
-        if (user) {
-            if (cart?.products.length > 0 && guestId) {
-                dispatch(mergeCart({ guestId, user })).then(() => {
-                    dispatch(clearGuestId)
-                    navigate(isCheckoutRedirect ? "/checkout" : "/",{replace:true});
-                });
-            } else {
-                navigate(isCheckoutRedirect ? "/checkout" : "/",{replace:true});
-            }
+        if (!user) return;
+        const hasGuestItems = cart?.products?.length > 0 && guestId;
+        if (hasGuestItems) {
+            dispatch(mergeCart({ guestId, user })).then(() => {
+                dispatch(clearGuestId());
+                dispatch(fetchCart({ userId: user._id }));
+                navigate(isCheckoutRedirect ? "/checkout" : "/", { replace: true });
+            });
+        } else {
+            dispatch(fetchCart({ userId: user._id }));
+            navigate(isCheckoutRedirect ? "/checkout" : "/", { replace: true });
         }
-    }, [user, guestId, cart, navigate, isCheckoutRedirect, dispatch]);
+    }, [user]); // eslint-disable-line react-hooks/exhaustive-deps
 
     const handleSubmit = async (e) => {
         e.preventDefault();  //Stops the page from refreshing when the form is submitted.

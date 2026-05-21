@@ -5,6 +5,7 @@ import {
     fetchAllOrders,
     updateOrderStatus,
 } from "../../redux/slices/adminOrderSlice";
+import Spinner from "../Common/Spinner";
 
 const OrderManagement = () => {
     const dispatch = useDispatch();
@@ -25,9 +26,7 @@ const OrderManagement = () => {
         await dispatch(updateOrderStatus({ id: orderId, status }));
     };
 
-    if (loading) {
-        return <p className="text-center py-6">Loading...</p>;
-    }
+    if (loading) return <Spinner />;
 
     if (error) {
         return (

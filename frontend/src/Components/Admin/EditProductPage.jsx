@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { deleteImage, uploadImage } from "../../redux/slices/uploadSlice";
 import { resetUpload } from "../../redux/slices/uploadSlice";
 import { XMarkIcon } from "@heroicons/react/24/solid";
+import Spinner from "../Common/Spinner";
 
 const EditProductPage = () => {
 
@@ -117,7 +118,7 @@ const EditProductPage = () => {
     }
   }
 
-  if (loading) return <p className="text-center">Loading...</p>;
+  if (loading) return <Spinner />;
   if (error) return <p className="text-center">Error: {error}</p>;
 
   return (
@@ -158,6 +159,8 @@ const EditProductPage = () => {
             name="price"
             value={productData.price}
             onChange={handleChange}
+            onWheel={(e) => e.target.blur()}
+            onKeyDown={(e) => ["ArrowUp","ArrowDown"].includes(e.key) && e.preventDefault()}
             className="w-full border border-gray-300 rounded-md p-2"
           />
         </div>
@@ -170,6 +173,8 @@ const EditProductPage = () => {
             name="discountPrice"
             value={productData.discountPrice || ""}
             onChange={handleChange}
+            onWheel={(e) => e.target.blur()}
+            onKeyDown={(e) => ["ArrowUp","ArrowDown"].includes(e.key) && e.preventDefault()}
             className="w-full border border-gray-300 rounded-md p-2"
           />
         </div>
@@ -182,6 +187,8 @@ const EditProductPage = () => {
             name="countInStock"
             value={productData.countInStock}
             onChange={handleChange}
+            onWheel={(e) => e.target.blur()}
+            onKeyDown={(e) => ["ArrowUp","ArrowDown"].includes(e.key) && e.preventDefault()}
             className="w-full border border-gray-300 rounded-md p-2"
           />
         </div>

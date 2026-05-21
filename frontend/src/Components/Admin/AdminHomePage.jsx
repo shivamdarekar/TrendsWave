@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import { fetchAdminProducts } from "../../redux/slices/adminProductSlice";
 import { fetchAllOrders } from "../../redux/slices/adminOrderSlice";
+import Spinner from "../Common/Spinner";
 
 const AdminHomePage = () => {
   const dispatch = useDispatch();
@@ -34,7 +35,7 @@ const AdminHomePage = () => {
       <h1 className="text-3xl font-bold mb-6">Admin Dashboard</h1>
 
       {/* Loading State */}
-      {isLoading && <p className="text-center py-4">Loading...</p>}
+      {isLoading && <Spinner />}
 
       {/* Error State */}
       {hasError && (

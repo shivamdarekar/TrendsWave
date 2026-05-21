@@ -65,7 +65,7 @@ const Register = () => {
             console.error("Registration failed:", error);
 
             // Handle known error cases
-            if (error.message?.toLowerCase().includes("user already exists")) {
+            if (error.message?.toLowerCase().includes("user already exists") || error.message?.toLowerCase().includes("user is already exist")) {
                 setEmailError("This email is already registered. Please login or use another.");
             } else {
                 setEmailError("Registration failed. Please try again.");

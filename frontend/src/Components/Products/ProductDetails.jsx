@@ -6,6 +6,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { fetchProductDetails, fetchSimilarProducts } from "../../redux/slices/productsSlice";
 import { addToCart } from "../../redux/slices/cartSlice";
 import namer from "color-namer";
+import Spinner from "../Common/Spinner";
 
 
 // const selectedProduct = {
@@ -140,13 +141,9 @@ const ProductDetails = ({ productId }) => {
             });
     };
 
-    if (loading) {
-        <p className="text-center">Loading...</p>
-    }
+    if (loading) return <Spinner />;
 
-    if (error) {
-        <p className="text-center">Error: {error}</p>
-    }
+    if (error) return <p className="text-center">Error: {error}</p>;
 
     return (
         <div className="sm:p-6">

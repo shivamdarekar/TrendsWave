@@ -1,9 +1,9 @@
-// OrderConfirmation.jsx
 import React, { useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchOrderDetails } from "../redux/slices/orderSlice";
 import { clearCart } from "../redux/slices/cartSlice";
+import Spinner from "../Components/Common/Spinner";
 
 const OrderConfirmation = () => {
     const { state } = useLocation(); // { orderId }
@@ -21,7 +21,7 @@ const OrderConfirmation = () => {
     }, [dispatch, state, navigate]);
 
     if (!state?.orderId) return null;
-    if (loading) return <p className="text-center">Loading...</p>;
+    if (loading) return <Spinner />;
     if (error) return <p className="text-center">Error: {error}</p>;
     if (!orderDetails) return null;
 

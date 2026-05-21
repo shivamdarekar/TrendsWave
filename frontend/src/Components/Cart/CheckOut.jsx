@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { createCheckout } from "../../redux/slices/checkoutSlice.js";
 import axios from "axios";
 import { getAllStates, getDistricts } from "india-state-district";
+import Spinner from "../Common/Spinner";
 
 // helper to load Razorpay script once
 const loadRazorpayScript = () =>
@@ -197,7 +198,7 @@ const Checkout = () => {
     };
 
 
-    if (loading) return <p>Loading Cart...</p>;
+    if (loading) return <Spinner />;
     if (error) return <p>Error: {error}</p>;
     if (!cart?.products?.length) return <p>Your cart is empty</p>;
 
@@ -318,7 +319,10 @@ const Checkout = () => {
                     <div className="mb-4">
                         <label className="block text-gray-700">Pin Code</label>
                         <input
-                            type="number"
+                            type="text"
+                            inputMode="numeric"
+                            maxLength={6}
+                            pattern="[0-9]{6}"
                             value={shippingAddress.postalCode}
                             onChange={(e) =>
                                 setShippingAddress({ ...shippingAddress, postalCode: e.target.value })
@@ -332,7 +336,9 @@ const Checkout = () => {
                     <div className="mb-4">
                         <label className="block text-gray-700">Phone</label>
                         <input
-                            type="number"
+                            type="tel"
+                            pattern="[0-9]{10}"
+                            maxLength={10}
                             value={shippingAddress.phone}
                             onChange={(e) =>
                                 setShippingAddress({ ...shippingAddress, phone: e.target.value })

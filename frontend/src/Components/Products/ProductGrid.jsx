@@ -1,10 +1,9 @@
 import { Link } from "react-router-dom";
+import Spinner from "../Common/Spinner";
 
 const ProductGrid = ({ products, loading, error }) => {
 
-  if (loading) {
-    return <p className="text-center">Loading...</p>
-  }
+  if (loading) return <Spinner />;
 
   if (error) {
     return <p className="text-center">Error: {error}</p>
@@ -17,7 +16,8 @@ const ProductGrid = ({ products, loading, error }) => {
             <div className="w-full aspect-[3/4] relative mb-3">
               <img
                 src={product.images[0].url}
-                alt={product.images.altText || product.name}
+                alt={product.images[0]?.altText || product.name}
+                loading="lazy"
                 className="w-full h-full object-cover rounded-lg"
               />
               {/* Overlay for Name & Price */}

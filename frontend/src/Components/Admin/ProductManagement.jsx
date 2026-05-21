@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux';
 import { deleteProduct, fetchAdminProducts } from '../../redux/slices/adminProductSlice';
 import { toast } from 'sonner';
+import Spinner from '../Common/Spinner';
 
 const ProductManagement = () => {
 
@@ -36,7 +37,7 @@ const ProductManagement = () => {
         navigate(`/product/${productId}`);
     }
 
-    if (loading) return <p className='text-center'>Loading...</p>
+    if (loading) return <Spinner />
     if (error) return <p className='text-center'>Error: {error}</p>
 
     return (

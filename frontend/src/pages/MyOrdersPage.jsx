@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { fetchUserOrders } from "../redux/slices/orderSlice";
+import Spinner from "../Components/Common/Spinner";
 
 const MyOrdersPage = ({limit}) => {
   const dispatch = useDispatch();
@@ -16,9 +17,7 @@ const MyOrdersPage = ({limit}) => {
     navigate(`/order/${orderId}`);
   };
 
-  if (loading) {
-    return <p className="text-center py-10">Loading...</p>;
-  }
+  if (loading) return <Spinner />;
 
   if (error) {
     return (

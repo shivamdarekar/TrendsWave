@@ -19,11 +19,12 @@ const Profile = () => {
         }
     }, [user, navigate]);
 
-    const handleLogout = () => {
-        dispatch(logoutUser()).unwrap();
+    const handleLogout = async () => {
+        if (!window.confirm("Are you sure you want to logout?")) return;
+        await dispatch(logoutUser()).unwrap();
         dispatch(clearCart());
         dispatch(clearOrders());
-        navigate("/login",{replace:true});
+        navigate("/login", { replace: true });
     };
 
     return (

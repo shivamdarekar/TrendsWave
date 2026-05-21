@@ -113,11 +113,35 @@ const FilterSidebar = () => {
         updateURLParams(newFilters)
     }
 
+    const clearAllFilters = () => {
+        const empty = {
+            category: "", gender: "", color: "",
+            size: [], material: [], brand: [],
+            minPrice: 0, maxPrice: 3000,
+        };
+        setFilters(empty);
+        setPriceRange([0, 3000]);
+        setSearchParams(new URLSearchParams());
+        navigate("?");
+    };
+
+    const hasActiveFilters = filters.category || filters.gender || filters.color ||
+        filters.size.length > 0 || filters.material.length > 0 || filters.brand.length > 0 ||
+        Number(filters.maxPrice) < 3000;
+
     return (
         <div className="p-4">
-            <h3 className="text-xl font-medium text-gray-800 mb-4">
-                Filter
-            </h3>
+            <div className="flex items-center justify-between mb-4">
+                <h3 className="text-xl font-medium text-gray-800">Filter</h3>
+                {hasActiveFilters && (
+                    <button
+                        onClick={clearAllFilters}
+                        className="text-sm text-red-500 hover:underline font-medium"
+                    >
+                        Clear All
+                    </button>
+                )}
+            </div>
 
             {/* Category filter */}
             <div className="mb-6">
@@ -177,13 +201,13 @@ const FilterSidebar = () => {
                             name="color"
                             value={color}
                             onClick={handleFilterChange}
+                            aria-label={`Filter by color: ${color}`}
                             className={`cursor-pointer h-8 w-8 rounded-full border border-gray-300
                               transition hover:scale-105
                               ${filters.color === color ? "ring-2 ring-blue-500" : ""}
                               `}
                             style={{ backgroundColor: color.toLowerCase() }}
-                        >
-                        </button>
+                        />
                     ))}
                 </div>
             </div>
