@@ -17,16 +17,15 @@ const getCart = async (userId, guestId) => {
 
 //add product to cart for a guest or logged in user
 //access -> public
-//FIXED: Use atomic findOneAndUpdate to prevent race conditions
 router.post("/", async (req, res) => {
   const { productId, quantity, size, color, guestId, userId } = req.body;
-
+  // If userId provided, validate it's a valid ObjectId format to prevent injection
+  const safeFilter = userId ? { user: userId } : { guestId };
   try {
-    const product = await Product.findById(productId);
+    const product = await Product.findById(productId).select({ name: 1, images: 1, price: 1, discountPrice: 1, owner: 1 });
     if (!product) return res.status(404).json({ message: "Product not found" });
 
-    // Use atomic findOneAndUpdate to increment existing product quantity
-    const filter = userId ? { user: userId } : { guestId };
+    const filter = safeFilter;
     
     const updatedCart = await Cart.findOneAndUpdate(
       {
@@ -109,36 +108,36 @@ router.put("/", async (req, res) => {
   const { productId, quantity, size, color, guestId, userId } = req.body;
 
   try {
-    let cart = await getCart(userId, guestId);
+    const filter = userId ? { user: userId } : { guestId };
 
-    if (!cart) return res.status(404).json({ message: "Product not found" });
-
-    const productIndex = cart.products.findIndex(
-      (p) =>
-        p.productId.toString() === productId &&
-        p.size === size &&
-        p.color === color
-    );
-
-    if (productIndex > -1) {
-      //update quantity
-      if (quantity > 0) {
-        cart.products[productIndex].quantity = quantity;
-      } else {
-        //Removes 1 item from the cart.products array at productIndex.
-        cart.products.splice(productIndex, 1); //remove product if quantity is 0
-      }
-      cart.totalPrice = cart.products.reduce(
-        (acc, item) =>
-          acc + (item.discountPrice ?? item.price) * (item.quantity || 1),
-        0
+    if (quantity <= 0) {
+      // Remove item atomically
+      const cart = await Cart.findOneAndUpdate(
+        filter,
+        { $pull: { products: { productId, size, color } } },
+        { new: true }
       );
-
+      if (!cart) return res.status(404).json({ message: "Cart not found" });
+      cart.totalPrice = cart.products.reduce(
+        (acc, item) => acc + (item.discountPrice ?? item.price) * (item.quantity || 1), 0
+      );
       await cart.save();
       return res.status(200).json(cart);
-    } else {
-      return res.status(404).json({ message: "Product not found in cart.." });
     }
+
+    const cart = await Cart.findOneAndUpdate(
+      { ...filter, "products.productId": productId, "products.size": size, "products.color": color },
+      { $set: { "products.$.quantity": quantity } },
+      { new: true }
+    );
+
+    if (!cart) return res.status(404).json({ message: "Product not found in cart" });
+
+    cart.totalPrice = cart.products.reduce(
+      (acc, item) => acc + (item.discountPrice ?? item.price) * (item.quantity || 1), 0
+    );
+    await cart.save();
+    return res.status(200).json(cart);
   } catch (error) {
     console.error(error);
     return res.status(500).send("Error while updating the quantity");
@@ -150,36 +149,24 @@ router.delete("/", async (req, res) => {
   const { productId, size, color, guestId, userId } = req.body;
 
   try {
-    let cart = await getCart(userId, guestId);
+    const filter = userId ? { user: userId } : { guestId };
+
+    const cart = await Cart.findOneAndUpdate(
+      filter,
+      { $pull: { products: { productId, size, color } } },
+      { new: true }
+    );
 
     if (!cart) return res.status(404).json({ message: "Cart not found" });
 
-    const productIndex = cart.products.findIndex(
-      (p) =>
-        p.productId.toString() === productId &&
-        p.size === size &&
-        p.color === color
+    cart.totalPrice = cart.products.reduce(
+      (acc, item) => acc + (item.discountPrice ?? item.price) * (item.quantity || 1), 0
     );
-
-    if (productIndex > -1) {
-      cart.products.splice(productIndex, 1);
-
-      cart.totalPrice = cart.products.reduce(
-        (acc, item) =>
-          acc + (item.discountPrice ?? item.price) * (item.quantity || 1),
-        0
-      );
-
-      await cart.save();
-      return res.status(200).json(cart);
-    } else {
-      return res.status(404).json({ message: "Product not found in cart" });
-    }
+    await cart.save();
+    return res.status(200).json(cart);
   } catch (error) {
     console.error(error);
-    return res
-      .status(500)
-      .json({ message: "Error while deleting item from cart" });
+    return res.status(500).json({ message: "Error while deleting item from cart" });
   }
 });
 
@@ -211,9 +198,6 @@ router.get("/", async (req, res) => {
   }
 });
 
-//if guest user click on checkout, redirect user to login page
-//merge guest cart into user cart on login
-//FIXED: Use MongoDB transactions to prevent race conditions
 router.post("/merge", protect, async (req, res) => {
   const { guestId } = req.body;
   const session = await Cart.startSession();

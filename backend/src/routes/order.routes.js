@@ -1,7 +1,6 @@
 import express from "express";
 import { Order } from "../models/order.model.js";
 import { protect } from "../middleware/authMiddleware.js";
-import { User } from "../models/user.model.js";
 
 const router = express.Router();
 
@@ -27,29 +26,15 @@ router.get("/my-orders", protect, async (req, res) => {
 // Get order details by id
 router.get("/:id", protect, async (req, res) => {
   try {
-    const userId = req.user._id;
-
-    const user = await User.findById(userId);
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
-
-    // First fetch order without populating
-    const order = await Order.findById(req.params.id);
+    const order = await Order.findById(req.params.id).populate("user", "name email");
 
     if (!order) {
       return res.status(404).json({ message: "Order not found" });
     }
 
-    // Ensure order belongs to the logged-in user
-    if (order.user.toString() !== userId.toString()) {
-      return res
-        .status(403)
-        .json({ message: "Not authorized to view this order" });
+    if (order.user._id.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ message: "Not authorized to view this order" });
     }
-
-    // Now populate after verification
-    await order.populate("user", "name email");
 
     res.json(order);
   } catch (error) {

@@ -11,6 +11,11 @@ router.post("/subscribe", async (req, res) => {
         return res.status(400).json({ message: "Email is required" });
     }
 
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+        return res.status(400).json({ message: "Invalid email format" });
+    }
+
     try {
         //check the email is already subscribed
         const subscriber = await Subscriber.findOne({ email });

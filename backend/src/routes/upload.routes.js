@@ -1,5 +1,4 @@
 import express from "express";
-import sharp from "sharp";
 import heicConvert from "heic-convert";
 import { upload } from "../utils/multer.js";
 import {
@@ -11,50 +10,37 @@ import { Product } from "../models/product.model.js";
 
 const router = express.Router();
 
+const ALLOWED_MIME_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif", "image/heic", "image/heif"];
+
+const processAndUpload = async (file) => {
+  let buffer = file.buffer;
+  if (
+    file.originalname.toLowerCase().endsWith(".heic") ||
+    file.mimetype === "image/heic" ||
+    file.mimetype === "image/heif"
+  ) {
+    buffer = await heicConvert({ buffer: file.buffer, format: "JPEG", quality: 1 });
+  }
+  return uploadOnCloudinary(buffer, { resource_type: "image" });
+};
+
 //add image at time of updating product
-router.post("/:productId",protect,admin,upload.single("image"), async (req, res) => {
+router.post("/:productId", protect, admin, upload.single("image"), async (req, res) => {
     try {
       const { productId } = req.params;
-
       if (!req.file || !req.file.buffer) {
         return res.status(400).json({ message: "No file uploaded" });
       }
-
-      let inputBuffer = req.file.buffer;
-
-      // If it's HEIC/HEIF → convert to JPEG first
-      if (
-        req.file.originalname.toLowerCase().endsWith(".heic") ||
-        req.file.mimetype === "image/heic" ||
-        req.file.mimetype === "image/heif"
-      ) {
-        inputBuffer = await heicConvert({
-          buffer: req.file.buffer,
-          format: "JPEG",
-          quality: 1,
-        });
+      if (!ALLOWED_MIME_TYPES.includes(req.file.mimetype)) {
+        return res.status(400).json({ message: "Invalid file type. Only JPEG, PNG, WebP, GIF images are allowed." });
       }
 
-      // Resize & convert
-      // const resizedBuffer = await sharp(inputBuffer)
-      //   .resize(800, 800, {
-      //     fit: "contain",
-      //     background: { r: 255, g: 255, b: 255, alpha: 1 }
-      //   })
-      //   .jpeg({ quality: 90 })
-      //   .toBuffer();
-
-      // Upload to Cloudinary
-      const result = await uploadOnCloudinary(inputBuffer, {
-        resource_type: "image",
-      });
+      const result = await processAndUpload(req.file);
 
       const product = await Product.findById(productId);
-      if (!product)
-        return res.status(404).json({ message: "Product not found" });
+      if (!product) return res.status(404).json({ message: "Product not found" });
 
-      const image = { url: result.secure_url, publicId: result.public_id, altText: "" };
-      product.images.push(image);
+      product.images.push({ url: result.secure_url, publicId: result.public_id, altText: "" });
       await product.save();
 
       res.status(200).json({
@@ -69,43 +55,17 @@ router.post("/:productId",protect,admin,upload.single("image"), async (req, res)
   }
 );
 
-
 //upload image for add new product
-router.post("/",protect,admin,upload.single("image"), async (req, res) => {
+router.post("/", protect, admin, upload.single("image"), async (req, res) => {
     try {
-
       if (!req.file || !req.file.buffer) {
         return res.status(400).json({ message: "No file uploaded" });
       }
-
-      let inputBuffer = req.file.buffer;
-
-      // If it's HEIC/HEIF → convert to JPEG first
-      if (
-        req.file.originalname.toLowerCase().endsWith(".heic") ||
-        req.file.mimetype === "image/heic" ||
-        req.file.mimetype === "image/heif"
-      ) {
-        inputBuffer = await heicConvert({
-          buffer: req.file.buffer,
-          format: "JPEG",
-          quality: 1,
-        });
+      if (!ALLOWED_MIME_TYPES.includes(req.file.mimetype)) {
+        return res.status(400).json({ message: "Invalid file type. Only JPEG, PNG, WebP, GIF images are allowed." });
       }
 
-      // Resize & convert
-      // const resizedBuffer = await sharp(inputBuffer)
-      //   .resize(800, 800, {
-      //     fit: "contain",
-      //     background: { r: 255, g: 255, b: 255, alpha: 1 }
-      //   })
-      //   .jpeg({ quality: 90 })
-      //   .toBuffer();
-
-      // Upload to Cloudinary
-      const result = await uploadOnCloudinary(inputBuffer, {
-        resource_type: "image",
-      });
+      const result = await processAndUpload(req.file);
 
       res.status(200).json({
         message: "File uploaded successfully",

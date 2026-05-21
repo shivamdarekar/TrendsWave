@@ -69,10 +69,13 @@ router.get("/google/callback", (req, res, next) => {
 });
 
 router.get("/me", protect, async (req, res) => {
-  const me = await User.findById(req.user._id).select(
-    "-password -refreshToken"
-  );
-  res.json({ user: me });
+  try {
+    const me = await User.findById(req.user._id).select("-password -refreshToken");
+    if (!me) return res.status(404).json({ message: "User not found" });
+    res.json({ user: me });
+  } catch (error) {
+    res.status(500).json({ message: "Server error" });
+  }
 });
 
 export default router;
