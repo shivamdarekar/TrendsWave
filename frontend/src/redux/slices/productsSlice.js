@@ -207,7 +207,7 @@ const productSlice = createSlice({
         state.loading = false;
         const updatedProduct = action.payload;
         const index = state.products.findIndex(
-          (product) => product._id === updateProduct._id
+          (product) => product._id === updatedProduct._id
         );
         if (index !== -1) {
           state.products[index] = updatedProduct;

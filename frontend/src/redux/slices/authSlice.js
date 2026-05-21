@@ -37,7 +37,7 @@ export const fetchCurrentUser = createAsyncThunk(
     } catch (error) {
       // If it fails (e.g., no valid token), it means the user is not logged in.
       localStorage.removeItem("userInfo");
-      return rejectWithValue(error.response.data);
+      return rejectWithValue(error.response?.data || { message: "Network error" });
     }
   }
 );
@@ -50,15 +50,11 @@ export const loginUser = createAsyncThunk(
       const response = await axios.post(
         `${import.meta.env.VITE_BACKEND_URL}/api/users/login`,
         userData
-        //axiosConfig
       );
-      //localStorage.setItem("userInfo", JSON.stringify(response.data.user));
-      //localStorage.setItem("userToken", response.data.token);
-
-      return response.data.user; //Return the user object from the response
+      return response.data.user;
     } catch (error) {
       localStorage.removeItem("userInfo");
-      return rejectWithValue(error.response.data);
+      return rejectWithValue(error.response?.data || { message: "Network error" });
     }
   }
 );
@@ -72,12 +68,10 @@ export const registerUser = createAsyncThunk(
         `${import.meta.env.VITE_BACKEND_URL}/api/users${endpoint}`,
         userData
       );
-      //localStorage.setItem("userInfo", JSON.stringify(response.data.user));
-
-      return response.data.user; //Return the user object from the response
+      return response.data.user;
     } catch (error) {
       localStorage.removeItem("userInfo");
-      return rejectWithValue(error.response.data);
+      return rejectWithValue(error.response?.data || { message: "Network error" });
     }
   }
 );
@@ -126,7 +120,7 @@ const authSlice = createSlice({
       })
       .addCase(loginUser.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload.message;
+        state.error = action.payload?.message || "Login failed";
       })
       .addCase(registerUser.pending, (state) => {
         state.loading = true;
@@ -138,7 +132,7 @@ const authSlice = createSlice({
       })
       .addCase(registerUser.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload.message;
+        state.error = action.payload?.message || "Registration failed";
       })
       .addCase(logoutUser.fulfilled, (state) => {
         state.user = null;
@@ -146,7 +140,7 @@ const authSlice = createSlice({
         localStorage.setItem("guestId", state.guestId);
       })
       .addCase(logoutUser.rejected, (state, action) => {
-        state.error = action.payload.message;
+        state.error = action.payload?.message || "Logout failed";
       })
 
       //fetch current user

@@ -28,7 +28,7 @@ export const fetchCart = createAsyncThunk(
       return response.data;
     } catch (error) {
       console.error(error);
-      return rejectWithValue(error.response.data);
+      return rejectWithValue(error.response?.data || { message: "Network error" });
     }
   }
 );
@@ -54,7 +54,7 @@ export const addToCart = createAsyncThunk(
       );
       return response.data;
     } catch (error) {
-      return rejectWithValue(error.response.data);
+      return rejectWithValue(error.response?.data || { message: "Network error" });
     }
   }
 );
@@ -80,7 +80,7 @@ export const updateCartQuantity = createAsyncThunk(
       );
       return response.data;
     } catch (error) {
-      return rejectWithValue(error.response.data);
+      return rejectWithValue(error.response?.data || { message: "Network error" });
     }
   }
 );
@@ -97,7 +97,7 @@ export const removeFromCart = createAsyncThunk(
             });
             return response.data;
         } catch (error) {
-            return rejectWithValue(error.response.data);
+            return rejectWithValue(error.response?.data || { message: "Network error" });
         }
     }
 );
@@ -113,7 +113,7 @@ export const mergeCart = createAsyncThunk(
             );
             return response.data;
         } catch (error) {
-            return rejectWithValue(error.response.data)
+            return rejectWithValue(error.response?.data || { message: "Network error" });
         }
     }
 );
@@ -129,7 +129,32 @@ const cartSlice = createSlice({
         clearCart: (state) => {
             state.cart = { products: [] };
             localStorage.removeItem("cart");
-        }
+        },
+        // Optimistic update — instantly update quantity in UI before API responds
+        optimisticUpdateQuantity: (state, action) => {
+            const { productId, quantity, size, color } = action.payload;
+            const item = state.cart.products.find(
+                (p) => p.productId === productId && p.size === size && p.color === color
+            );
+            if (item) {
+                item.quantity = quantity;
+                state.cart.totalPrice = state.cart.products.reduce(
+                    (acc, p) => acc + (p.discountPrice ?? p.price) * p.quantity, 0
+                );
+                saveCartToStorage(state.cart);
+            }
+        },
+        // Optimistic remove — instantly remove item in UI before API responds
+        optimisticRemoveItem: (state, action) => {
+            const { productId, size, color } = action.payload;
+            state.cart.products = state.cart.products.filter(
+                (p) => !(p.productId === productId && p.size === size && p.color === color)
+            );
+            state.cart.totalPrice = state.cart.products.reduce(
+                (acc, p) => acc + (p.discountPrice ?? p.price) * p.quantity, 0
+            );
+            saveCartToStorage(state.cart);
+        },
     },
 
     extraReducers: (builder) => {
@@ -163,9 +188,8 @@ const cartSlice = createSlice({
                 state.error = action.payload?.message || "Failed to add to cart";
             })
 
-            //update item quantity
+            //update item quantity — no loading state, optimistic update handles UI
             .addCase(updateCartQuantity.pending, (state) => {
-                state.loading = true;
                 state.error = null;
             })
             .addCase(updateCartQuantity.fulfilled, (state, action) => {
@@ -178,9 +202,8 @@ const cartSlice = createSlice({
                 state.error = action.payload?.message || "Failed to update item quantity";
             })
 
-            //remove item from cart
+            //remove item from cart — no loading state, optimistic update handles UI
             .addCase(removeFromCart.pending, (state) => {
-                state.loading = true;
                 state.error = null;
             })
             .addCase(removeFromCart.fulfilled, (state, action) => {
@@ -210,7 +233,7 @@ const cartSlice = createSlice({
     },
 });
 
-export const { clearCart } = cartSlice.actions;
+export const { clearCart, optimisticUpdateQuantity, optimisticRemoveItem } = cartSlice.actions;
 export default cartSlice.reducer;
 
 
