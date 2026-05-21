@@ -9,8 +9,8 @@ const cartItemSchema = new mongoose.Schema({
 
     name: String,
     image: String,
-    price: String,
-    discountPrice: String,
+    price: Number,
+    discountPrice: Number,
     size: String,
     color: String,
 
@@ -48,6 +48,9 @@ const cartSchema = new mongoose.Schema({
 },
     {timestamps:true}
 );
+
+cartSchema.index({ user: 1 });
+cartSchema.index({ guestId: 1 });
 
 export const Cart = mongoose.model("Cart",cartSchema)
 

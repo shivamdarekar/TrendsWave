@@ -50,7 +50,7 @@ const productSchema = new mongoose.Schema(
 
     colors: {
       type: [String],
-      requires: true,
+      required: true,
     },
 
     collections: {
@@ -131,5 +131,15 @@ const productSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+productSchema.index({ gender: 1, category: 1 });
+productSchema.index({ collections: 1 });
+productSchema.index({ price: 1 });
+productSchema.index({ rating: -1 });
+productSchema.index({ createdAt: -1 });
+productSchema.index({ brand: 1 });
+productSchema.index({ material: 1 });
+productSchema.index({ name: 1 });
+productSchema.index({ owner: 1 });
 
 export const Product = mongoose.model("Product", productSchema);

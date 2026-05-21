@@ -53,11 +53,11 @@ const checkoutSchema = new mongoose.Schema({
     checkoutItems: [checkoutItemSchema],
 
     shippingAddress: {
-        address: { type: String, requires: true },
-        state: { type: String, requires: true },
-        district: { type: String, requires: true },
-        postalCode: { type: String, requires: true },
-        country: { type: String, requires: true },
+        address: { type: String, required: true },
+        state: { type: String, required: true },
+        district: { type: String, required: true },
+        postalCode: { type: String, required: true },
+        country: { type: String, required: true },
     },
 
     paymentMethod: {
@@ -99,5 +99,8 @@ const checkoutSchema = new mongoose.Schema({
 },
     { timestamps: true }
 );
+
+checkoutSchema.index({ user: 1 });
+checkoutSchema.index({ isPaid: 1, isFinalized: 1 });
 
 export const Checkout = mongoose.model("Checkout", checkoutSchema);
