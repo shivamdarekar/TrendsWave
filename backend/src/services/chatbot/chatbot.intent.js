@@ -1,6 +1,7 @@
 import {
   chatbotCategoryMappings,
   chatbotColorMappings,
+  chatbotCollectionMappings,
   chatbotQueryLimits,
 } from "../../data/chatbotMappings.js";
 
@@ -41,6 +42,18 @@ function detectCategory(message) {
   return null;
 }
 
+function detectCollection(message) {
+  const normalized = message.toLowerCase();
+
+  for (const mapping of chatbotCollectionMappings) {
+    if (mapping.aliases.some((alias) => normalized.includes(alias))) {
+      return mapping.canonical;
+    }
+  }
+
+  return null;
+}
+
 function detectGender(message) {
   const normalized = message.toLowerCase();
 
@@ -50,6 +63,42 @@ function detectGender(message) {
 
   if (normalized.includes("men") || normalized.includes("man") || normalized.includes("male")) {
     return "Men";
+  }
+
+  return null;
+}
+
+function detectPriceConstraints(message) {
+  const normalized = message.toLowerCase();
+  const numberPattern = /(?:₹|rs\.?|inr\s*)?(\d{2,7}(?:,\d{3})*(?:\.\d+)?)/i;
+
+  const betweenMatch = normalized.match(/(?:between|from)\s+(?:₹|rs\.?|inr\s*)?(\d{2,7}(?:,\d{3})*(?:\.\d+)?)\s+(?:and|to)\s+(?:₹|rs\.?|inr\s*)?(\d{2,7}(?:,\d{3})*(?:\.\d+)?)/i);
+  if (betweenMatch) {
+    return {
+      minPrice: Number(betweenMatch[1].replace(/,/g, "")),
+      maxPrice: Number(betweenMatch[2].replace(/,/g, "")),
+    };
+  }
+
+  const underMatch = normalized.match(/(?:under|below|less than|upto|up to|<=)\s+(?:₹|rs\.?|inr\s*)?(\d{2,7}(?:,\d{3})*(?:\.\d+)?)/i);
+  if (underMatch) {
+    return {
+      maxPrice: Number(underMatch[1].replace(/,/g, "")),
+    };
+  }
+
+  const overMatch = normalized.match(/(?:over|above|more than|greater than|>=)\s+(?:₹|rs\.?|inr\s*)?(\d{2,7}(?:,\d{3})*(?:\.\d+)?)/i);
+  if (overMatch) {
+    return {
+      minPrice: Number(overMatch[1].replace(/,/g, "")),
+    };
+  }
+
+  const standalonePrice = normalized.match(numberPattern);
+  if (standalonePrice && /(?:budget|price|cost|rupees|rs\.?|inr|under|below|above|between|range)/i.test(normalized)) {
+    return {
+      maxPrice: Number(standalonePrice[1].replace(/,/g, "")),
+    };
   }
 
   return null;
@@ -83,7 +132,9 @@ function detectIntent(message) {
 function buildLocalPlan(message, context = {}) {
   const color = detectColor(message);
   const category = detectCategory(message);
+  const collection = detectCollection(message);
   const gender = detectGender(message);
+  const priceConstraints = detectPriceConstraints(message);
   const intent = detectIntent(message);
   const isStyleQuestion = intent === "recommendation" && /\b(this|that|these|those)\b/i.test(message);
 
@@ -120,8 +171,20 @@ function buildLocalPlan(message, context = {}) {
     filters.category = category;
   }
 
+  if (collection) {
+    filters.collection = collection;
+  }
+
   if (gender) {
     filters.gender = gender;
+  }
+
+  if (priceConstraints?.minPrice != null) {
+    filters.minPrice = priceConstraints.minPrice;
+  }
+
+  if (priceConstraints?.maxPrice != null) {
+    filters.maxPrice = priceConstraints.maxPrice;
   }
 
   if (context.gender && !filters.gender) {
@@ -132,8 +195,24 @@ function buildLocalPlan(message, context = {}) {
     filters.category = context.category;
   }
 
+  if (context.collection && !filters.collection) {
+    filters.collection = context.collection;
+  }
+
   if (context.colors?.length && !filters.colors && intent === "recommendation") {
     filters.colors = context.colors[0];
+  }
+
+  if (context.tags?.length && !filters.tags) {
+    filters.tags = context.tags[0];
+  }
+
+  if (context.minPrice != null && filters.minPrice == null) {
+    filters.minPrice = context.minPrice;
+  }
+
+  if (context.maxPrice != null && filters.maxPrice == null) {
+    filters.maxPrice = context.maxPrice;
   }
 
   const needsFollowUp = intent === "recommendation" && !filters.category && !filters.colors && isStyleQuestion;
@@ -211,6 +290,10 @@ function buildMongoQuery(plan) {
 
   if (filters.collection) {
     query.collections = new RegExp(escapeRegex(filters.collection), "i");
+  }
+
+  if (filters.tags) {
+    query.tags = { $in: [new RegExp(escapeRegex(filters.tags), "i")] };
   }
 
   if (filters.minPrice || filters.maxPrice) {

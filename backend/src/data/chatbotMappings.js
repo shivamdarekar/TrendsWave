@@ -29,6 +29,37 @@ export const chatbotCategoryMappings = [
   },
 ];
 
+export const chatbotCollectionMappings = [
+  {
+    canonical: "Casual Wear",
+    aliases: ["casual", "everyday", "daily", "day out", "weekend", "relaxed", "informal"],
+  },
+  {
+    canonical: "Formal Wear",
+    aliases: ["formal", "occasion", "occasional", "party", "wedding", "ceremony", "event", "dressy"],
+  },
+  {
+    canonical: "Business Wear",
+    aliases: ["office", "work", "professional", "corporate", "meeting", "business"],
+  },
+  {
+    canonical: "Vacation Wear",
+    aliases: ["summer", "vacation", "holiday", "beach", "travel", "resort", "hot weather"],
+  },
+  {
+    canonical: "Winter Essentials",
+    aliases: ["winter", "cold", "cool weather", "layering", "thermal", "autumn", "fall"],
+  },
+  {
+    canonical: "Streetwear",
+    aliases: ["streetwear", "street style", "urban", "trend", "trendy", "casual street"],
+  },
+  {
+    canonical: "Basics",
+    aliases: ["basic", "basics", "plain", "simple", "everyday basic"],
+  },
+];
+
 export const chatbotQueryLimits = {
   defaultLimit: 4,
   maxLimit: 6,
